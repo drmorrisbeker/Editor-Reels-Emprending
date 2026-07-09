@@ -19,8 +19,8 @@ TPL_ROOT="templates/Root.template.tsx"
 
 # 1) Snapshot si el src actual NO es ya la plantilla en blanco
 if [ -f "$REEL" ] && ! grep -q "PLANTILLA EN BLANCO" "$REEL"; then
-  # Nombre del proyecto anterior según videoSrc en Root.tsx; si no, timestamp
-  PREV="$(grep -oE 'proyectos/[^/"]+' "$ROOT" 2>/dev/null | head -1 | sed 's#proyectos/##')"
+  # Nombre del proyecto anterior según la línea de videoSrc en Root.tsx; si no, timestamp
+  PREV="$(grep 'videoSrc' "$ROOT" 2>/dev/null | grep -oE 'proyectos/[^/"]+' | head -1 | sed 's#proyectos/##')"
   [ -n "${PREV:-}" ] || PREV="sin-archivar-$(date +%Y%m%d-%H%M%S)"
   SNAP="_archivo/$PREV/src"
   mkdir -p "$SNAP"
