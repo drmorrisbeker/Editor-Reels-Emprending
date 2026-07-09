@@ -1,7 +1,37 @@
+# Dependencias — se reconstruyen con `npm ci` (versiones exactas en package-lock.json)
 node_modules
 dist
+out
 .DS_Store
 .env
 
-# Ignore the output video from Git but not videos you import into src/.
-out
+# Motor de transcripción — se auto-instala en la 1ª corrida de scripts/transcribe.mjs
+# (via @remotion/install-whisper-cpp). No hace falta compartirlo (~3 GB).
+whisper.cpp
+
+# Material de trabajo / entregables / archivo — no afectan el render de la plantilla
+_archivo
+_render_hold
+Finales
+
+# Binarios pesados por-video (el diseño NO depende de ellos; se generan por proyecto).
+# Los .json de captions y los .txt de caption SÍ se versionan (formato de ejemplo).
+public/proyectos/**/*.mp4
+public/proyectos/**/*.wav
+public/proyectos/**/*.mov
+public/proyectos/**/*.png
+public/proyectos/**/*.jpg
+public/proyectos/**/*.mp3
+
+# Scratch temporales de scripts (copias de trabajo por-video)
+scripts/_*_tmp.py
+
+# Docs legacy/stale — contradicen las reglas vivas (base.md + yapping.md son la
+# fuente de verdad). Se mantienen locales pero NO se comparten para evitar
+# instrucciones contradictorias en quien clona.
+reel-core.md
+REEL-MANUAL.md
+CLAUDE-REF.md
+
+# Se mantienen sí o sí (definen el look, son livianos):
+#   public/sfx/*.mp3 · package-lock.json · src/ · .claude/ · scripts/ · docs

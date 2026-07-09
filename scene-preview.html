@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Scene Preview — Dr. Beker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    gap: 40px;
+    flex-wrap: wrap;
+    padding: 40px;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .label {
+    color: #666;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Preview 1/4 del canvas real */
+  .canvas {
+    width: 270px;
+    height: 480px;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: #fcf0d7;
+    border-radius: 10px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  }
+
+  .logo-bg {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 225px;
+    opacity: 0.03;
+    pointer-events: none;
+  }
+
+  .content {
+    position: absolute;
+    top: 44%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+  }
+
+  .content p {
+    margin: 0;
+    font-size: 27.5px;
+    line-height: 1.08;
+    letter-spacing: -0.25px;
+    color: #213142;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .accent { color: #ad7d5e; }
+</style>
+</head>
+<body>
+
+<!-- ESCENA 1: Apertura ~3s -->
+<div class="col">
+  <div class="label">Apertura ~3s</div>
+  <div class="canvas">
+    <img src="logo-isotipo.svg" class="logo-bg" />
+    <div class="content">
+      <p>
+        Nadie te<br>
+        habla de<br>
+        <span class="accent">esto.</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ESCENA 2: Concepto central -->
+<div class="col">
+  <div class="label">Concepto central</div>
+  <div class="canvas">
+    <img src="logo-isotipo.svg" class="logo-bg" />
+    <div class="content">
+      <p>
+        No tenés que<br>
+        elegir entre<br>
+        los dos.<br>
+        <span class="accent">Hay solución.</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ESCENA 3: Cierre -->
+<div class="col">
+  <div class="label">Cierre</div>
+  <div class="canvas">
+    <img src="logo-isotipo.svg" class="logo-bg" />
+    <div class="content">
+      <p>
+        Entender<br>
+        es el primer<br>
+        <span class="accent">paso.</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

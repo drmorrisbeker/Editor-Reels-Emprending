@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(npx *)",
+      "Bash(ffmpeg *)",
+      "Bash(node *)",
+      "Bash(python3 *)",
+      "Bash(ffprobe *)",
+      "mcp__buffer__list_posts",
+      "Bash(xdg-open *)"
+    ]
+  }
+}
