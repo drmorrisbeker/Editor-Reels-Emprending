@@ -14,19 +14,19 @@ import { Reaction } from "./Reaction";
 import { ReactionPropsSchema } from "./reactionSchema";
 
 const reelDefaultProps = {
-  videoSrc: "proyectos/prevencion-suicidio-no-un-dia/Ediciones/clip_edit.mp4",
-  captionsSrc: "proyectos/prevencion-suicidio-no-un-dia/Ediciones/clip_edit_captions.json",
-  bgMusicSrc: "",
-  brand: "foropsiquiatria" as const,
-  hookText: "Estar atentos no puede ser cosa de un solo día.",
+  videoSrc: "proyectos/<nombre>/Ediciones/clip_edit.mp4", // ← COMPLETAR
+  captionsSrc: "proyectos/<nombre>/Ediciones/clip_edit_captions.json", // ← COMPLETAR
+  bgMusicSrc: "", // opcional: ruta a un mp3 en public/ (música muy sutil, vol 0.02)
+  brand: "beker" as const, // ← COMPLETAR (marca: "beker" | "clubdeterapia" — la skill lo pregunta al arranque)
+  hookText: "Gancho de los primeros segundos", // ← COMPLETAR (dolor concreto / pregunta urgente)
   titleCard: {
     type: "statement" as const,
     lines: [{ text: "", yellow: false }],
   },
   titleCardDurationMs: 5000,
-  portadaBgMs: 7850,
+  portadaBgMs: 8000, // ← COMPLETAR (correr node scripts/portada_bg_pick.mjs <captions.json>)
   overlays: [],
-  durationSeconds: 60.67,
+  durationSeconds: 60, // ← COMPLETAR (duración del clip editado)
 };
 
 // reel-REACCIÓN — bloques fijos: split (arriba 40% yo / abajo 60% reaccionado) → opinión full-screen.

@@ -23,10 +23,7 @@ const RAMP_MS = 200;
 // de los captions, no inventar ventanas de ~1s). 6–8 por video, escala 1.08–1.14, máximo
 // al cierre. Ver .claude/rules/yapping.md.
 const ZOOM_PHRASES: { startMs: number; endMs: number; scale: number }[] = [
-  { startMs: 9160, endMs: 11200, scale: 1.06 },  // "la problemática del suicidio y su prevención"
-  { startMs: 26200, endMs: 28640, scale: 1.07 }, // "también lo tienen el resto de los meses"
-  { startMs: 41930, endMs: 46400, scale: 1.08 }, // "la principal causa de muerte... grupos etarios"
-  { startMs: 56500, endMs: 60180, scale: 1.10 }, // cierre "no queda reducido a un día, una semana o un mes"
+  // { startMs: 0, endMs: 0, scale: 1.10 },   // ← COMPLETAR
 ];
 
 // Clicks sutiles (sfx/click.mp3, vol 0.03) SOLO en los 4–5 momentos más contundentes
@@ -116,7 +113,7 @@ export const Reel: React.FC<ReelProps> = ({
 
       {/* Portada — frame 0-1 para thumbnail del feed */}
       <Sequence from={0} durationInFrames={2}>
-        <Portada titulo={"NO ALCANZA"} linea2="CON UN DÍA" brand={b} />
+        <Portada titulo={"TÍTULO"} linea2="GANCHO?" brand={b} /> {/* ← COMPLETAR (título de portada) */}
       </Sequence>
 
       {/* ThumbnailCover — primeros ~2.5 segundos */}
