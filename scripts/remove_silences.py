@@ -10,6 +10,18 @@ import json, os, subprocess, sys
 # Raíz del proyecto = carpeta padre de scripts/ (portable, no hardcodear rutas absolutas)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
+def probe_duration(path):
+    """Duración del input en segundos (ffprobe). Necesaria para no perder el tramo final."""
+    r = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path],
+        cwd=PROJECT_ROOT, capture_output=True, text=True,
+    )
+    try:
+        return float(r.stdout.strip())
+    except ValueError:
+        sys.exit(f"No pude leer la duración de {path} con ffprobe; abortando.")
+
 INPUT  = "public/proyectos/2026-01-30-yapping/Crudos/input.mp4"
 OUTPUT = "public/proyectos/2026-01-30-yapping/ediciones/clip_edit.mp4"
 
@@ -31,19 +43,32 @@ SILENCE = [
 # Speech segments = gaps between silence periods
 # Each segment is padded by PAD_SEC on both sides, clamped to the silence boundaries.
 speech = []
+DURATION = probe_duration(INPUT)
 
 # Skip segment before first silence if it starts at 0 (pure silence/noise)
-if SILENCE[0][0] > 0.5:
+if SILENCE and SILENCE[0][0] > 0.5:
     speech.append((0, SILENCE[0][0] + PAD_SEC))
 
 # Segments between silences
-# Last segment gets 400ms end-padding for impact pause instead of PAD_SEC
 for i in range(len(SILENCE) - 1):
     s = SILENCE[i][1] - PAD_SEC
-    end_pad = 0.40 if i == len(SILENCE) - 2 else PAD_SEC
-    e = SILENCE[i+1][0] + end_pad
+    e = SILENCE[i+1][0] + PAD_SEC
     if e - s > 0.05:
         speech.append((s, e))
+
+# FIX 2026-09-08 — tramo final. Antes el script solo generaba tramos ENTRE silencios y daba por
+# hecho que el último elemento de SILENCE era el final del video. Si el video NO termina en un
+# silencio ≥ d (o si uno se olvidaba de pegar el "marcador de fin"), todo lo posterior al último
+# silencio se perdía — en un crudo de 39 s con un solo silencio en 5–8 s quedaban 5.5 s.
+if not SILENCE:
+    speech = [(0.0, DURATION)]
+elif DURATION - SILENCE[-1][1] > 0.3:
+    speech.append((max(0.0, SILENCE[-1][1] - PAD_SEC), DURATION))
+
+# Último tramo del video: 400 ms de colchón de impacto en vez de PAD_SEC, sin pasarse del fin
+if speech:
+    s, e = speech[-1]
+    speech[-1] = (s, min(e - PAD_SEC + 0.40, DURATION))
 
 print("Segments to keep:")
 for i, (s, e) in enumerate(speech):
