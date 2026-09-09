@@ -1,120 +1,54 @@
 ---
 name: reel-yapping
-description: Procesar un video crudo con la Plantilla Dr. Beker estilo yapping — locutor full screen, zoom phrases, animaciones completas y concept scenes de enumeración. Usar cuando Morris pase un video para editar como reel vertical con la plantilla completa. También usar si pide "procesa este video" o "armá el reel" sin especificar tipo.
+description: Pipeline de edición para reels verticales donde el Dr. habla a cámara con la Plantilla Dr. Beker (silencios → transcript → propuesta de títulos/escenas/recortes → zoom/clicks/rehook/escenas → render → caption). La invoca el agente `ai-video-editor` después de rutear y elegir perfil, o Morris explícito con `/reel-yapping <ruta>`. Ante "procesá este video" / "armá el reel" NO activarla directo — se lanza el agente `ai-video-editor`, que decide entre esta skill y reel-reaction.
 ---
 
-Leer en este orden antes de continuar:
-1. `.claude/rules/base.md`
-2. `.claude/rules/yapping.md`
+# reel-yapping — pipeline de edición
 
-Si el mensaje no incluye ruta del video, pedirla antes de continuar. **No pedir el hook text al inicio** — se define después de transcribir.
+## Modo de ejecución
+- **Bajo `ai-video-editor`** (normal): el agente ya eligió `PERFIL` y creó el proyecto. Las pausas de esta skill son bloques `## CHECKPOINT` con los que el agente **termina su corrida**; el hilo principal se lo muestra a Morris y lo reanuda con la respuesta. Un checkpoint por corrida; nunca asumir una respuesta.
+- **Directo** (`/reel-yapping`): las pausas son mensajes normales; esperar la respuesta de Morris.
+- **Delegación:** si tenés la tool `Agent`, las fases A (transcribir), B (escenas) y C (render) se delegan a `subagent_type: "reel-worker"` con el prompt "Ejecutá `.claude/skills/reel-yapping/tareas/<archivo>` con NOMBRE=… CRUDO=… …" (A y C con `model: "sonnet"`; B sin `model`, prompt "Invocá la skill `reel-scenes` con este spec: …"). Si no tenés `Agent` (o Morris dice "sin subagentes"), ejecutá vos el archivo de tarea al pie de la letra.
+- **Contexto:** leé este archivo + `transcript_resumen.md` + `PERFIL` (secciones que necesites) + `.claude/rules/yapping.md` en el paso 8. **Nunca** el JSON de captions completo (solo tokens puntuales con `node -e`), nunca `src/components/scenes/*`, nunca `CLAUDE-YOUTUBE.md`/`CLAUDE-REF.md`/`REEL-MANUAL.md`.
+- `PERFIL` default: `estilos/morris-beker/PERFIL.md`. Todo valor de look sale de ahí.
 
-Al recibir la ruta del video:
-1. Arrancar el proyecto con estado limpio: `bash scripts/new_project.sh <nombre>` — crea
-   `public/proyectos/<nombre>/{Crudos,ediciones,final}/` y **resetea `src/Reel.tsx` y
-   `src/Root.tsx` a la plantilla en blanco** (guardando snapshot del video anterior si no
-   se archivó). Esto evita arrastrar zoom/sonidos/escenas del video previo.
-2. Mover el video crudo a `public/proyectos/<nombre>/Crudos/` con `mv`
-3. Usar esa ruta como `input.mp4` en todos los pasos siguientes
-
-> **Eficiencia:** no leer el cuerpo de toda `src/components/scenes/` (crece con cada
-> video). El catálogo de scenes está en `yapping.md`; abrir solo la que se vaya a reutilizar.
-
-Preguntar también: **¿Querés agregar música de fondo?** Si sí, pedir la ruta del archivo. La música debe ser muy sutil, de fondo (`volume: 0.02`) sin tapar la voz. Copiar el mp3 a la carpeta del proyecto en `public/` y setear `bgMusicSrc` en Root.tsx.
-
-## Flujo de trabajo
-
-Seguir los pasos 1–7 de base.md (cortar silencios → transcribir → revisar captions).
-
-**Detección de frases repetidas (parte del paso 7):** Antes de proponer títulos, correr este script para detectar secuencias de 3 palabras que aparezcan más de una vez. `<clip>` es el nombre del video que se transcribió en el paso 6 (`clip_edit2` si hubo 2da pasada, `clip_edit` si no) — `transcribe.mjs` escribe `<clip>_captions.json` al lado del video:
-
+## Paso 0 — Setup
+Si falta la ruta del video, pedirla. **No pedir el hook al inicio** (se define con el transcript).
 ```bash
-node -e "
-const caps = JSON.parse(require('fs').readFileSync('public/proyectos/<nombre>/ediciones/<clip>_captions.json'));
-const words = [];
-let cur = null;
-caps.forEach(c => {
-  if (c.text.startsWith(' ') || cur === null) {
-    if (cur) words.push(cur);
-    cur = { text: c.text.trim(), startMs: c.startMs };
-  } else { cur.text += c.text; }
-});
-if (cur) words.push(cur);
-const seqMap = {};
-for (let i = 0; i < words.length - 2; i++) {
-  const seq = words[i].text + ' ' + words[i+1].text + ' ' + words[i+2].text;
-  if (!seqMap[seq]) seqMap[seq] = [];
-  seqMap[seq].push((words[i].startMs/1000).toFixed(1) + 's');
-}
-Object.entries(seqMap).filter(([,v]) => v.length > 1).forEach(([seq, times]) => console.log(times.join(' | ') + ' → \"' + seq + '\"'));
-"
+bash scripts/new_project.sh <slug-provisional> <perfil> <ruta-crudo>   # resetea src/ a la plantilla, crea carpetas, mueve el crudo, escribe PIPELINE.md, línea en REELS.md
 ```
+Slug provisional = fecha `YYYY-MM-DD-<3-palabras>`; el definitivo se decide en el CHECKPOINT. Mantener `public/proyectos/<slug>/PIPELINE.md` (formato en el agente) actualizado al cerrar cada fase.
 
-Si hay repeticiones, **no eliminar automáticamente** — reportarlas al usuario con los segundos de cada ocurrencia y preguntar cuál conservar. El Dr. puede haberse equivocado al grabar o puede ser repetición retórica intencional.
+## Fase A — Transcribir (worker, sonnet)
+`tareas/A-transcribir.md` con `NOMBRE`, `CRUDO`, `MODO=inicial`. Devuelve una línea; leer `ediciones/transcript_resumen.md` (~100 líneas: transcript por oración con ms, repeticiones, tokens dudosos, pausas, última palabra, `portadaBgMs`). Si dice `REVISAR` en última palabra y el worker no lo resolvió, re-lanzar A con `EXTEND_LAST=0.4`.
 
-### Pausa obligatoria tras el paso 7 — propuesta de títulos y escenas
+## Paso 7 — Revisión y PAUSA OBLIGATORIA (un solo mensaje)
+Leer el resumen completo. Antes de tocar Root.tsx, Reel.tsx o renderizar, presentar la propuesta entera y **esperar**. Guardar el mismo texto en `ediciones/propuesta.md`. Contenido:
 
-Antes de tocar Root.tsx, Reel.tsx o renderizar, presentar una propuesta completa en un solo mensaje para aprobación. Incluye tres partes:
+1. **Título de portada** — aparece en el feed (grid IG/TikTok). Breve, 1–2 líneas en mayúsculas, genera curiosidad para abrir. Ej: "CALLATE LA / BOCA." 2–3 opciones con una línea de justificación.
+2. **Gancho / hook** — texto de los primeros 2–3 s (ThumbnailCover). Toca un dolor concreto o una pregunta urgente para frenar el scroll. Suele ser distinto al título. 2–3 opciones justificadas.
+3. **Rehook (evaluar si aplica)** — placa corta que confirma o tensiona el gancho ("La respuesta corta: SÍ.", "Pero hay un problema."). No obligatoria. **El timestamp debe coincidir exactamente con el momento en que el Dr. dice esa frase** — si la dice en el segundo 15, va en el 15. 1.5–2 s. Verificar que no contradiga el audio en ese instante.
+4. **Escenas de concepto (opcional, recomendadas)** — 1–3 momentos donde una scene full-screen refuerce o explique algo. Por cada una: timestamp, qué dice el Dr., qué haría visualmente y por qué, y si reutiliza una scene del catálogo (`node scripts/scenes_catalog.mjs`, leer solo la tabla) o es nueva. Reglas: nunca antes de los 3 s, nunca para cerrar, 90 frames cada una. No forzar escenas.
+5. **Recortes de fluidez** — segmentos que bajan retención, ordenados por impacto, con timestamp, texto exacto, duración y razón: repeticiones de contexto (mismo concepto varias veces sin info nueva), hedges largos (≥5 s de aclaraciones que diluyen la frase anterior), transiciones vacías ("y te voy a explicar por qué", "como te digo", "obviamente"). Proponer los segmentos a **conservar** en formato `KEEP`.
+6. **Repeticiones detectadas** (sección del resumen) — cada una con sus segundos: ¿cuál conservar? No eliminar automático: puede ser error de grabación o repetición retórica.
+7. **Música de fondo** — ¿sí (ruta) / no? (volumen del perfil, muy sutil).
+8. **Caption** — ¿CTA de engagement o lead magnet? Si lead magnet: qué comentar y qué reciben.
+9. **Nombre de carpeta definitivo** — kebab-case por el concepto central (ej. `ansiedad-no-se-elimina`). Nunca dejar nombre de fecha.
+Si el perfil no es `morris-beker`, avisar acá que los componentes aún tienen el look por defecto (Nivel 2 pendiente).
 
----
+Morris puede aprobar, ajustar o descartar por partes. Anotar cada decisión en `PIPELINE.md` › `decisiones:`.
 
-**1. Título de portada** — aparece en el feed (Instagram/TikTok grid). Breve, 1–2 líneas en mayúsculas. Genera curiosidad para que abran el video. Ejemplo: "CALLATE LA / BOCA."
-Proponer 2–3 opciones con una línea de justificación cada una.
+## Post-aprobación
+1. **Recortes** (si aprobó alguno) → worker A con `MODO=recorte`, `CRUDO=<clip actual>`, `KEEP=<segmentos>`. Re-leer el resumen nuevo: todos los timestamps de acá en adelante salen de él (cero remapeo).
+2. **Escenas** (si aprobó alguna) → worker B en background con el spec (una línea por escena, ver `reel-scenes`), `NOMBRE`, `PERFIL`. Mientras corre, seguir con 3–5.
+3. **Captions** (solo el orquestador toca el JSON, con `node -e` puntual): alucinaciones (`caps[i].text=' correcto'`, fusionar/`splice`), **idea boundaries** — cuando el Dr. termina una idea y empieza otra sin punto ni pausa ≥380 ms, capitalizar el primer token de la idea nueva para que `isSentenceBoundary` abra página nueva (leer el transcript completo del resumen antes de decidir); zero-duration ya corregidos por el worker; los ocultamientos que pida `scenes_snippets.md` › Captions.
+4. **Renombrar** `public/proyectos/<provisional>` → `<definitivo>` (`mv`) y actualizar `REELS.md`.
+5. **Root.tsx:** `videoSrc` (clip final), `captionsSrc`, `bgMusicSrc` (mp3 copiado a la carpeta del proyecto, o `""`), `hookText`, `titleCardDurationMs` (default 5000), `durationSeconds` (del resumen), `portadaBgMs` (candidato del resumen), `portadaTitulo` / `portadaLinea2` (título de portada aprobado). `titleCard`/`overlays` ya no existen.
+6. **Reel.tsx** — leer ahora `.claude/rules/yapping.md`: `ZOOM_PHRASES` (6–8, sostenidos, `endMs` real de la frase; valores de escala/ramp en `PERFIL` › Animación), `PHRASE_SOUNDS` (máx 4–5, click del perfil), Rehook si aprobado. Cuando llegue el worker B: pegar los imports bajo `import { Subtitles }` y las Sequences dentro del bloque `ESCENAS DE CONCEPTO / REHOOK` antes de su `*/}` de cierre; **borrar los zooms/clicks dentro de los "Rangos cubiertos"**; aplicar la sección Captions.
+7. `npx tsc --noEmit -p .` sin errores nuevos.
 
-**2. Gancho / hook title** — texto de los primeros 2–3 segundos (ThumbnailCover). Tiene que tocar un dolor concreto o generar una pregunta urgente para detener el scroll. Suele ser diferente al título de portada.
-Proponer 2–3 opciones con una línea de justificación cada una.
+## Fase C — Render (worker, sonnet, background) ‖ caption
+`tareas/C-render.md` con `NOMBRE`. Mientras renderiza, escribir `public/proyectos/<NOMBRE>/caption.txt` según `referencias/caption.md` con la respuesta del ítem 8. Si C devuelve ERROR, arreglar Root/Reel y relanzar C.
 
-**3. Rehook (evaluar si aplica)** — escena de texto simple con una frase corta que confirma o tensiona el gancho ("La respuesta corta: SÍ.", "Pero hay un problema.", etc.). No es obligatoria. **El timestamp del Rehook debe coincidir exactamente con el momento en que el Dr. dice esa frase en el audio** — no va siempre a los 3–4s. Si la frase clave ocurre en el segundo 15, el Rehook va en el segundo 15. Duración: 1.5–2s (45–60 frames).
-
-**4. Escenas de concepto (opcional pero recomendadas)** — leer el contenido del video e identificar 1–3 momentos donde una scene full-screen reforzaría el impacto o explicaría un concepto visualmente. Para cada momento propuesto, indicar:
-- Timestamp aproximado (en segundos del clip editado)
-- Qué dice el Dr. en ese momento
-- Qué haría la escena visualmente y por qué refuerza el concepto
-- Si usaría una scene existente (ver lista en yapping.md) o habría que crear una nueva
-
-**Estética de todas las scenes:** usar la paleta rehook — fondo `#f5e9d2`, texto `#162a3e`, acento `#b18060`. Las scenes deben ser **didácticas y esquemáticas**: flujos con flechas, barras comparativas, listas con íconos, antes/después. No son placas de texto suelto — explican algo visualmente de forma clara.
-
-**Reglas de placement:**
-- Nunca antes de los 3s del clip (el ThumbnailCover todavía está activo)
-- Nunca para cerrar el video — el cierre siempre es el Dr. en pantalla
-- **90 frames (3s) por scene** para legibilidad en móvil; N Sequences independientes, no una larga continua
-- Después de definir las scenes, revisar ZOOM_PHRASES y eliminar los que caigan dentro del rango de cualquier scene (la scene cubre el video completo — el zoom de fondo no se ve)
-
-No forzar escenas si el contenido no las necesita. La prioridad es que cada escena aporte algo real: ilustrar algo abstracto, contrastar un mito, enumerar ítems, mostrar un flujo causal.
-
-**5. Recortes de fluidez** — leer el transcript completo e identificar segmentos que reducen la retención. Proponer cada corte con timestamp, texto exacto, duración y razón:
-- **Repeticiones de contexto**: el Dr. nombra el mismo concepto o condición (ej. "cuando estás con ansiedad") varias veces sin información nueva
-- **Hedges largos** (≥5s de aclaraciones que diluyen el impacto de la frase anterior): "si bien a veces en algunos casos puede ser utilizado de cierta forma..."
-- **Frases de transición vacías**: "y te voy a explicar por qué", "como te digo", "obviamente"
-
-Ordenar por impacto estimado en retención. **No ejecutar automáticamente** — esperar aprobación. El usuario puede aprobar parcialmente. Si se aprueban cortes, aplicarlos con ffmpeg filter_complex concat y regenerar los captions con offsets ajustados antes de renderizar.
-
----
-
-Esperar respuesta antes de continuar. El usuario puede aprobar, ajustar, o descartar partes de la propuesta.
-
-### Pasos 8–9 (después de la aprobación)
-
-Configurar Root.tsx y Reel.tsx con los títulos aprobados. Aplicar zoom phrases y concept scenes según yapping.md.
-
-**PHRASE_SOUNDS:** usar clicks sutiles (`sfx/click.mp3`, vol 0.03) para resaltar conceptos clave — los mismos momentos de impacto que los zooms, máx 4–5 por video. No usar en transiciones ni palabras de relleno — solo en los momentos más contundentes.
-
-Renderizar.
-
-Solo si hay que crear una scene nueva: seguir la sección **"Concept scenes — estética y duración"** de `.claude/rules/yapping.md` (paleta rehook `#f5e9d2`/`#162a3e`/`#b18060`, template `MiScene` con woosh/plops, spring configs).
-
-### Paso 10 — Renombrar carpeta del proyecto (OBLIGATORIO, nunca saltear)
-
-**Nunca dejar la carpeta con nombre de fecha** (ej. `2026-04-29-00-18`). Después del render exitoso, siempre renombrar a un nombre descriptivo en kebab-case basado en el concepto central del video:
-
-```bash
-mv public/proyectos/<carpeta-actual> public/proyectos/<nombre-descriptivo>
-```
-
-Actualizar en Root.tsx las rutas `videoSrc` y `captionsSrc` con el nuevo nombre de carpeta. Confirmarle al usuario la ruta final del video renderizado.
-
-### Paso 11 — Caption para redes (OBLIGATORIO, nunca saltear)
-
-Preguntar primero: **¿CTA de engagement o lead magnet? Si es lead magnet, ¿qué comentar y qué reciben?**
-
-Luego generar el caption según las reglas de base.md y guardarlo en `public/proyectos/<nombre>/caption.txt`.
+## Cierre
+Reporte: ruta del mp4 (`final/<NOMBRE>.mp4`), `caption.txt`, decisiones aplicadas, y **preguntar** "¿archivo este proyecto?". Solo con confirmación: `bash scripts/archive_project.sh <NOMBRE> <perfil>` (entregable → `Finales/<perfil>/<año>/<fecha>-<NOMBRE>/` con mp4 + caption + portada.png + decisiones.md; pesado → `_archivo/`; `src/` vuelve a la plantilla en blanco; `REELS.md` → archivado). Nunca archivar con un render pendiente o sin aprobar.
