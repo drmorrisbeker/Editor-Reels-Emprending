@@ -3,7 +3,7 @@ Composición: `Plantilla-DrBeker-Reels` | 1080×1920 @ 30fps | h264
 
 ## Flujo (10 pasos)
 1. Video crudo: usar la ruta del video que pase el usuario (carpeta de crudos/screencasts propia)
-2. Crear `public/proyectos/<nombre>/{Crudos,Ediciones,Final}/` y mover el video crudo a `Crudos/`
+2. `bash scripts/new_project.sh <nombre>` crea `public/proyectos/<nombre>/{Crudos,Ediciones}/` (media de trabajo) y `Finales/<nombre>/` (donde va el render, fuera de `public/`). Mover el crudo a `Crudos/`. **Los finales NO van dentro de `public/`: hay UNA sola carpeta de finales, `Finales/<nombre>/`.**
 3. Detect silences: `ffmpeg -i input.mp4 -af silencedetect=noise=-35dB:d=2.0 -f null -` — PAD_SEC=0.15
 4. Cut: `scripts/remove_silences.py` → `clip_edit.mp4` (editar `INPUT`/`OUTPUT`/`SILENCE` en el script o en una copia `scripts/_rs_tmp.py`). Desde 2026-09-08 el script **agrega solo el tramo final** (del último silencio al fin del archivo) — ya no hace falta pegar un "marcador de fin" en `SILENCE`, y sin silencios conserva el archivo entero.
    **Cierre del video:** Siempre verificar que el último segmento incluya la palabra final completa más ~300–500ms de silencio de impacto después. El Dr. cierra con una frase contundente — cortarla a mitad o sin silencio de asiento arruina el remate. Extender el último segmento si hace falta. **CRÍTICO: No aplicar un corte de silencio que tape la última palabra** — si la última sílaba cae dentro de un silencio detectado, mantenerla completa y agregar el buffer manualmente en el segmento final antes de correr `remove_silences.py`.
@@ -11,16 +11,16 @@ Composición: `Plantilla-DrBeker-Reels` | 1080×1920 @ 30fps | h264
 6. Transcribe: `node scripts/transcribe.mjs public/proyectos/<nombre>/Ediciones/<clip>.mp4` (whisper **large-v3 con división por palabra** desde 2026-09-08 — `medium` derivaba los timestamps; `--model medium` para volver) — `<clip>` es `clip_edit2` si hubo 2da pasada, `clip_edit` si no. Escribe `<clip>_captions.json` al lado del video; **todos los scripts de este documento y de la skill leen ese mismo archivo** (usar el nombre del clip que se transcribió, no uno fijo).
 7. Revisar captions: corregir alucinaciones, fusionar tokens, ajustar zero-duration (`endMs = startMs + 50`)
 8. Root.tsx: `videoSrc`, `captionsSrc`, `bgMusicSrc`, `hookText`, `titleCardDurationMs`, `durationSeconds`
-9. Render: `npx remotion render Plantilla-DrBeker-Reels public/proyectos/<nombre>/Final/<nombre>.mp4`
+9. Render: `npx remotion render Plantilla-DrBeker-Reels Finales/<nombre>/<nombre>.mp4`
 10. **Cierre/archivado (SOLO con confirmación del usuario, video ya terminado y aprobado).**
     `public/` no debe acumular videos: lo que Remotion no necesita renderizar, sale de `public/` (si no,
     cada bundle copia GB de más). Al cerrar un reel, **preguntar** "¿archivo este proyecto?" y si confirma:
     ```bash
     bash scripts/archive_project.sh <nombre>
     ```
-    Divide el proyecto en dos, **ambos fuera de `public/`** (nada se borra, todo recuperable):
+    Saca el material de trabajo de `public/` (nada se borra, todo recuperable):
     - `Crudos/` + `Ediciones/` (material de trabajo pesado) → `_archivo/<nombre>/`
-    - `Final/` + `caption.txt` (el entregable) → `Finales/<nombre>/`
+    - `caption.txt` → `Finales/<nombre>/` (el render **ya está ahí** desde el paso 9)
     - snapshot de `src/Reel.tsx` + `src/Root.tsx` → `_archivo/<nombre>/src/` y **reset del
       código a la plantilla en blanco** (`templates/`), para que el próximo video arranque limpio.
     Y elimina la carpeta `public/proyectos/<nombre>/` ya vacía. Para re-renderizar más tarde, mover de

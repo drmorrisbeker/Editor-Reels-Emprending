@@ -52,12 +52,13 @@ public/
   proyectos/<nombre>/
     Crudos/      ← videos crudos originales
     Ediciones/   ← clips cortados + *_captions.json + assets de trabajo
-    Final/       ← el reel renderizado
     caption.txt  ← copy para redes
   logos/         ← logos de marca (ej. foropsiquiatria.png, clubterapia-navy-sinbarras.png)
   sfx/           ← efectos de sonido (click, woosh, plop…)
 ```
-Los .mp4/.png/.mp3 de `proyectos/` están gitignoreados (no se versionan).
+`public/proyectos/` guarda SOLO media de trabajo (Crudos + Ediciones + caption). **El reel
+renderizado NO va acá** — va a `Finales/<nombre>/` (ver abajo). Los .mp4/.png/.mp3 de
+`proyectos/` están gitignoreados.
 
 ## Archivo (FUERA de `public/`, gitignoreado — no se copia en cada bundle de Remotion)
 - `_archivo/<nombre>/` — Crudos + Ediciones (material pesado) + snapshot de `src/` del video.
@@ -69,14 +70,14 @@ Los .mp4/.png/.mp3 de `proyectos/` están gitignoreados (no se versionan).
 (instalación) · `CLAUDE.md` (guía del proyecto) · `README.md` (boilerplate Remotion).
 
 ## ¿Dónde van los FINALES? (el reel renderizado)
-1. **Recién renderizado** → `public/proyectos/<nombre>/Final/<nombre>.mp4`
-   (ahí lo escribe `npx remotion render ...`).
-2. **Al cerrar/archivar** el proyecto (`bash scripts/archive_project.sh <nombre>`, con tu
-   confirmación) el reel + `caption.txt` se mueven **fuera de `public/`** a
-   **`Finales/<nombre>/`** (el entregable definitivo), y el material pesado va a `_archivo/`.
+**UNA sola carpeta: `Finales/<nombre>/`** (raíz, fuera de `public/`, gitignoreada). Es plana,
+por slug de proyecto — sin anidar por marca/año.
+- El `npx remotion render …` escribe **directo** a `Finales/<nombre>/<nombre>.mp4` (no a `public/`).
+- Al **archivar** (`archive_project.sh`), el `caption.txt` se suma ahí (el mp4 ya está), y el
+  material de trabajo (Crudos + Ediciones) va a `_archivo/<nombre>/`.
 
-Regla simple: **mientras trabajás**, el final está en `public/proyectos/<nombre>/Final/`;
-**cuando cerrás**, queda en `Finales/<nombre>/`.
+Regla simple: **el final SIEMPRE está en `Finales/<nombre>/`**, desde que se renderiza. No hay
+`Final/` dentro de `public/proyectos/` (esa carpeta se eliminó para no duplicar/confundir).
 
 ## Ciclo de vida de un proyecto
 `new_project.sh` → trabajar en `public/proyectos/<nombre>/` → render a `Final/` →

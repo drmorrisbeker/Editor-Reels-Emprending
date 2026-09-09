@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # archive_project.sh <nombre-proyecto>
 # Paso de CIERRE de un reel (correr SOLO con confirmación del usuario, video ya terminado).
-# Divide el proyecto en dos para sacarlo del bundle de Remotion sin perder nada:
+# Saca el material de trabajo del bundle de Remotion sin perder nada:
 #   1) Crudos/ + Ediciones/  (material de trabajo pesado) → _archivo/<nombre>/
-#   2) Final/ + caption.txt   (el entregable)             → Finales/<nombre>/   (fuera de public/)
+#   2) caption.txt           → Finales/<nombre>/   (junto al render, que YA se generó ahí)
+# El render final vive en Finales/<nombre>/ desde el paso de render (no en public/).
 # Luego elimina la carpeta public/proyectos/<nombre>/ si quedó vacía.
 # Ambos destinos viven FUERA de public/, así Remotion deja de copiarlos en cada bundle.
 # Nada se borra (salvo la carpeta del proyecto si quedó vacía): todo queda recuperable.
@@ -33,8 +34,7 @@ if [ -f "$VR/templates/Reel.template.tsx" ] && [ -f "$VR/templates/Root.template
   echo "src/Reel.tsx y src/Root.tsx reseteados a la plantilla en blanco (estado limpio para el próximo video)"
 fi
 
-# 2) entregable → Finales/
-[ -e "$SRC/Final" ] && mv "$SRC/Final" "$FIN/" && echo "entregable: Final/ → Finales/$NAME/"
+# 2) caption → Finales/ (el render ya está ahí; solo falta juntar el caption)
 for f in "$SRC"/caption.txt "$SRC"/*.txt; do
   [ -e "$f" ] && mv "$f" "$FIN/" && echo "entregable: $(basename "$f") → Finales/$NAME/"
 done
@@ -46,4 +46,4 @@ if [ -n "$(ls -A "$SRC" 2>/dev/null)" ]; then
 fi
 rmdir "$SRC" 2>/dev/null && echo "carpeta public/proyectos/$NAME/ eliminada (vacía)" || true
 
-echo "listo. Crudos/Ediciones en _archivo/$NAME · Final en Finales/$NAME"
+echo "listo. Crudos/Ediciones en _archivo/$NAME · entregable (mp4 + caption) en Finales/$NAME"

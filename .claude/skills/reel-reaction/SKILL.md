@@ -37,7 +37,7 @@ Presentar en un solo mensaje, para aprobación:
 Esperar OK. (No hay escenas ni zoom en reacción — no proponerlos.)
 
 ### Render y cierre
-- Render: `npx remotion render Plantilla-DrBeker-Reaccion public/proyectos/<nombre>/Final/<nombre>.mp4`
+- Render: `npx remotion render Plantilla-DrBeker-Reaccion Finales/<nombre>/<nombre>.mp4`
 - **Paso final obligatorio:** renombrar la carpeta a kebab-case descriptivo (nunca fecha) y
   actualizar `reactVideoSrc`/`sourceVideoSrc`/`opinionVideoSrc`/`captionsSrc` en Root.tsx.
 - **Caption para redes** (base.md + `.claude/rules/perfiles-caption.md` para el contexto del

@@ -49,7 +49,7 @@ frame del clip de opinión (cara full-screen).
    `durationSeconds` = `splitBlockSeconds` + duración de `clip_opinion`.
 10. **Render**:
     ```bash
-    npx remotion render Plantilla-DrBeker-Reaccion public/proyectos/<nombre>/Final/<nombre>.mp4
+    npx remotion render Plantilla-DrBeker-Reaccion Finales/<nombre>/<nombre>.mp4
     ```
 11. **Renombrar carpeta** a kebab-case descriptivo (nunca dejar fecha) y actualizar rutas en
     Root.tsx. Confirmar la ruta final.
