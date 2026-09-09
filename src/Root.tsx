@@ -10,16 +10,16 @@ import { Reel } from "./Reel";
 import { ReelPropsSchema } from "./schema";
 
 const reelDefaultProps = {
-  videoSrc: "proyectos/creadora-dbt-la-padecia/ediciones/clip_edit2.mp4",
-  captionsSrc: "proyectos/creadora-dbt-la-padecia/ediciones/clip_edit2_captions.json",
-  bgMusicSrc: "", // sin música (decisión de Morris)
-  hookText: "La creadora de la mejor terapia también la padecía",
-  titleCardDurationMs: 3500,
-  portadaBgMs: 8280,
-  portadaTitulo: "LOS MEJORES TERAPEUTAS",
-  portadaLinea2: "TAMBIÉN SUFREN",
+  videoSrc: "proyectos/<nombre>/ediciones/clip_edit.mp4", // ← COMPLETAR
+  captionsSrc: "proyectos/<nombre>/ediciones/clip_edit_captions.json", // ← COMPLETAR
+  bgMusicSrc: "", // opcional: ruta a un mp3 en public/ (música muy sutil, vol 0.02)
+  hookText: "Gancho de los primeros segundos", // ← COMPLETAR (dolor concreto / pregunta urgente)
+  titleCardDurationMs: 5000,
+  portadaBgMs: 8000, // ← COMPLETAR (usar el "portadaBgMs candidato" de ediciones/transcript_resumen.md, lo calcula scripts/captions_resumen.mjs)
+  portadaTitulo: "", // ← COMPLETAR (línea chica de contexto, uppercase)
+  portadaLinea2: "", // ← COMPLETAR (línea(s) grande(s) de remate; usar " / " para dos líneas)
   overlays: [],
-  durationSeconds: 72.92,
+  durationSeconds: 60, // ← COMPLETAR (duración del clip editado)
 };
 
 export const RemotionRoot: React.FC = () => {
