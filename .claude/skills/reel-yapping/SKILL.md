@@ -26,11 +26,11 @@ Preguntar también: **¿Querés agregar música de fondo?** Si sí, pedir la rut
 
 Seguir los pasos 1–7 de base.md (cortar silencios → transcribir → revisar captions).
 
-**Detección de frases repetidas (parte del paso 7):** Antes de proponer títulos, correr este script para detectar secuencias de 3 palabras que aparezcan más de una vez:
+**Detección de frases repetidas (parte del paso 7):** Antes de proponer títulos, correr este script para detectar secuencias de 3 palabras que aparezcan más de una vez. `<clip>` es el nombre del video que se transcribió en el paso 6 (`clip_edit2` si hubo 2da pasada, `clip_edit` si no) — `transcribe.mjs` escribe `<clip>_captions.json` al lado del video:
 
 ```bash
 node -e "
-const caps = JSON.parse(require('fs').readFileSync('public/proyectos/<nombre>/ediciones/clip_edit_captions.json'));
+const caps = JSON.parse(require('fs').readFileSync('public/proyectos/<nombre>/ediciones/<clip>_captions.json'));
 const words = [];
 let cur = null;
 caps.forEach(c => {

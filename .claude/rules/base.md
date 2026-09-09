@@ -8,7 +8,7 @@ Composición: `Plantilla-DrBeker-Reels` | 1080×1920 @ 30fps | h264
 4. Cut: `scripts/remove_silences.py` → `clip_edit.mp4`
    **Cierre del video:** Siempre verificar que el último segmento incluya la palabra final completa más ~300–500ms de silencio de impacto después. El Dr. cierra con una frase contundente — cortarla a mitad o sin silencio de asiento arruina el remate. Extender el último segmento si hace falta. **CRÍTICO: No aplicar un corte de silencio que tape la última palabra** — si la última sílaba cae dentro de un silencio detectado, mantenerla completa y agregar el buffer manualmente en el segmento final antes de correr `remove_silences.py`.
 5. 2da pasada: revisar silencios residuales (<300ms tras frases clave), cortar con ffmpeg filter_complex concat
-6. Transcribe: `node scripts/transcribe.mjs public/proyectos/<nombre>/ediciones/clip_edit2.mp4`
+6. Transcribe: `node scripts/transcribe.mjs public/proyectos/<nombre>/ediciones/<clip>.mp4` — `<clip>` es `clip_edit2` si hubo 2da pasada, `clip_edit` si no. Escribe `<clip>_captions.json` al lado del video; **todos los scripts de este documento y de la skill leen ese mismo archivo** (usar el nombre del clip que se transcribió, no uno fijo).
 7. Revisar captions: corregir alucinaciones, fusionar tokens, ajustar zero-duration (`endMs = startMs + 50`)
 8. Root.tsx: `videoSrc`, `captionsSrc`, `bgMusicSrc`, `hookText`, `titleCardDurationMs`, `durationSeconds`
 9. Render: `npx remotion render Plantilla-DrBeker-Reels public/proyectos/<nombre>/final/<nombre>.mp4`
@@ -53,7 +53,7 @@ Cuando el Dr. termina una idea y empieza otra (aunque no haya punto ni pausa ≥
 `portadaBgMs` — correr este script y usar el `startMs` resultante en Root.tsx:
 ```bash
 node -e "
-const caps = JSON.parse(require('fs').readFileSync('public/proyectos/[nombre]/ediciones/clip_edit_captions.json'));
+const caps = JSON.parse(require('fs').readFileSync('public/proyectos/[nombre]/ediciones/<clip>_captions.json'));
 const END_PUNCT = /[.!?…]/;
 const good = caps.filter(c =>
   c.confidence > 0.6 &&

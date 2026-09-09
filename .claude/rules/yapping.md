@@ -81,7 +81,7 @@ Usarla solo cuando el video lo justifica. No es obligatoria.
 - **Lista con íconos/pills:** ítems que entran uno a uno con spring
 
 ## NumeroConceptoScene
-Recibe `numero`, `linea1`, `linea2`. Renderiza: blur del video de fondo, número grande en #FFCC00, divisor blanco, concepto en 2 líneas bold.
+Recibe `numero`, `linea1`, `linea2`. Renderiza: blur del video de fondo, número grande en accent-soft de marca `#DFBE9A` (el `#FFCC00` está deprecado), divisor blanco, concepto en 2 líneas bold.
 Usar cuando: el Dr. enumera puntos explícitamente ("el primero es…", "punto 2…").
 
 Workflow:

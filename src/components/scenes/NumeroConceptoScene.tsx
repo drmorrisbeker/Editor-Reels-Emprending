@@ -1,6 +1,6 @@
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
-const YELLOW = "#FFCC00";
+const ACCENT = "#DFBE9A"; // accent-soft de marca (reemplaza el #FFCC00 deprecado)
 const WHITE  = "#FFFFFF";
 
 export const NumeroConceptoScene: React.FC<{
@@ -46,7 +46,7 @@ export const NumeroConceptoScene: React.FC<{
             fontFamily: "Inter, sans-serif",
             fontWeight: 900,
             fontSize: 200,
-            color: YELLOW,
+            color: ACCENT,
             lineHeight: 1,
             letterSpacing: "-0.04em",
           }}>
