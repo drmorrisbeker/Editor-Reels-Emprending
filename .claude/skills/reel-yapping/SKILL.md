@@ -103,6 +103,8 @@ Actualizar en Root.tsx las rutas `videoSrc` y `captionsSrc` con el nuevo nombre 
 
 ### Paso 11 — Caption para redes (OBLIGATORIO, nunca saltear)
 
-Preguntar primero: **¿CTA de engagement o lead magnet? Si es lead magnet, ¿qué comentar y qué reciben?**
+Cargar el **contexto del perfil** de la marca en `.claude/rules/perfiles-caption.md` (público,
+registro, contexto institucional, crédito del orador, CTA, hashtags). Preguntar el CTA **solo si el
+perfil no lo fija**: **¿engagement o lead magnet? Si es lead magnet, ¿qué comentar y qué reciben?**
 
-Luego generar el caption según las reglas de base.md y guardarlo en `public/proyectos/<nombre>/caption.txt`.
+Luego generar el caption según base.md + el perfil, y guardarlo en `public/proyectos/<nombre>/caption.txt`.

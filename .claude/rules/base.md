@@ -82,9 +82,15 @@ CdT `#A78768`+crema `#FCF0EA`). Scenes (paleta rehook): fondo `#f5e9d2` · texto
 - **Hook/ThumbnailCover: top ≥245** (usar 270). La **portada** lleva el texto al pie (`bottom: 430`), dentro de la zona segura inferior.
 
 ## Caption para redes
-Mismo texto para IG y TikTok. Guardar en `public/proyectos/<nombre>/caption.txt`. ~2.200 chars, español rioplatense ("vos/sos/hacés"). Cercano pero profesional. Sin CTAs genéricos.
+Mismo texto para IG y TikTok. Guardar en `public/proyectos/<nombre>/caption.txt`. ~2.200 chars. Registro por defecto rioplatense ("vos/sos/hacés"), cercano pero profesional, sin CTAs genéricos.
 
-Antes de escribir el caption, preguntar: **¿CTA de engagement o lead magnet? Si es lead magnet, ¿qué comentar y qué reciben?**
+**Contexto por perfil (CRÍTICO):** antes de escribir, cargar el bloque de la marca del reel en
+**`.claude/rules/perfiles-caption.md`** — define público, registro/voz, contexto institucional,
+cómo nombrar al orador (con su cargo), CTA típico y hashtags. Ese perfil puede pisar los defaults
+de arriba (ej. `foropsiquiatria` es registro formal, público profesional, contexto Fundación Foro,
+CTA institucional — NO lead magnet).
+
+Antes de escribir el caption, preguntar: **¿CTA de engagement o lead magnet? Si es lead magnet, ¿qué comentar y qué reciben?** (salvo que el perfil ya fije el tipo de CTA, ej. foropsiquiatria = institucional). En temas sensibles (suicidio, autolesión, consumo) incluir **líneas de ayuda** locales.
 
 Estructura:
 1. **Gancho** — la idea más provocadora. Sin emojis, sin "Hola". Directo.
