@@ -4,23 +4,30 @@ Fuente de verdad **humana** de las dos marcas. El código las implementa en `src
 (`BRANDS`, `getBrand`) — este md es la referencia que la skill/agente carga **solo cuando
 la necesita** (elegir marca, ajustar identidad). No hace falta leerlo en cada video.
 
-Los reels soportan **dos marcas**, elegidas al arranque vía prop `brand`
-(`"beker"` | `"clubdeterapia"`) en Root.tsx. Difieren en tipografía de portada, color de
-acento, portada y cartel de gancho. **Los subtítulos son iguales en ambas**: Inter ExtraBold
-(800), renglón junto (modo "page"), todo blanco, 74px.
+Los reels soportan **tres marcas**, elegidas al arranque vía prop `brand`
+(`"beker"` | `"clubdeterapia"` | `"foropsiquiatria"`) en Root.tsx. Difieren en tipografía de
+portada, color de acento/velo, portada y cartel de gancho. **Los subtítulos son iguales en
+todas**: Inter ExtraBold (800), renglón junto (modo "page"), todo blanco, 74px.
 
 ## Tabla comparativa
 
-| | **beker** (Dr. Morris Beker) | **clubdeterapia** (Club de Terapia) |
-|---|---|---|
-| Navy base | `#0F2135` | `#0F2135` |
-| Acento | cobre-soft `#DFBE9A` | cobre `#A78768` |
-| Subtítulos | Inter 800, blanco | Inter 800, blanco |
-| Portada — título (línea 1) | **Inter** 900, blanco | **Geist** Black, blanco |
-| Portada — gancho (línea 2) | cobre `#DFBE9A` | crema `#FCF0EA` |
-| Logo en portada | — (ninguno) | "club de terapia" en **Instrument Serif** (itálica), arriba a la derecha, crema `#FCF0EA` |
-| Cartel de gancho (ThumbnailCover) | fondo navy `#0F2135` / texto blanco | fondo blanco / texto navy `#0F2135` |
-| Fuente del cartel de gancho | Inter 800 | Inter 800 |
+| | **beker** (Dr. Morris Beker) | **clubdeterapia** (Club de Terapia) | **foropsiquiatria** (Foro Psiquiatría) |
+|---|---|---|---|
+| Velo de portada (`navy`) | `#0F2135` | `#0F2135` | `#070C53` (navy profundidad) |
+| Acento | cobre-soft `#DFBE9A` | cobre `#A78768` | amarillo `#EFA501` |
+| Subtítulos | Inter 800, blanco | Inter 800, blanco | Inter 800, blanco |
+| Portada — título (línea 1) | **Inter** 900, blanco | **Geist** Black, blanco | **Inter** 900, blanco |
+| Portada — gancho (línea 2) | cobre `#DFBE9A` | crema `#FCF0EA` | amarillo `#EFA501` |
+| Logo en portada | — | "club de terapia" (**Instrument Serif** itálica), arriba-der. | sello **imagen** `logos/foropsiquiatria.png`, arriba-der. |
+| Cartel de gancho (bg / texto) | navy `#0F2135` / blanco | blanco / navy `#0F2135` | azul `#0A127F` / blanco |
+| Fuente del cartel de gancho | Inter 800 | Inter 800 | Inter 800 |
+
+### Paleta institucional Foropsiquiatría (referencia completa)
+Obligatorios: Azul `#0A127F` · Amarillo `#EFA501` · Navy `#070C53` (profundidad).
+Fondos claros: Marfil `#F7F4EE` · Mist `#E7E7F2` · Soft gold `#FDF2D9` · Blanco `#FFFFFF`.
+Estados del azul: Hover `#0C1699` · Press `#080F66`. (Guardados en `brand.foropsiquiatria.palette`.)
+El logo es un **sello circular** (patrón floral azul/amarillo + "FORO PSIQUIATRÍA" en blanco) →
+va como imagen en `public/logos/foropsiquiatria.png` (`logoImgSrc`).
 
 ## Portada (común a ambas) — estilo "blur navy abajo"
 La cara del locutor queda **limpia arriba**; el texto va **al pie** (`bottom: 430`, zona segura)

@@ -18,6 +18,13 @@ import { BRANDS, type Brand, type BrandId } from "../brand";
 
 const SAFE_BOTTOM = 430; // px libres abajo (UI de IG/TikTok)
 
+// hex (#RRGGBB) → "r, g, b" para armar el degradé del velo con el color de cada marca.
+const hexToRgb = (hex: string): string => {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
+  return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+};
+
 const renderLines = (text: string, style: React.CSSProperties) =>
   text.split("\n").map((line, i) => (
     <span key={i} style={style}>
@@ -32,13 +39,26 @@ export const Portada: React.FC<{
   brand?: BrandId | Brand;
 }> = ({ titulo = "TÍTULO", linea2 = "GANCHO?", bgSrc, brand = "beker" }) => {
   const b: Brand = typeof brand === "string" ? BRANDS[brand] ?? BRANDS.beker : brand;
+  const rgb = hexToRgb(b.navy); // color del velo, según la marca
 
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
       {bgSrc && <Img src={staticFile(bgSrc)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
 
-      {/* Logo de marca horneado (solo Club de Terapia) — arriba a la derecha */}
-      {b.logoText && (
+      {/* Logo de marca horneado — arriba a la derecha. Imagen (sello) pisa al texto. */}
+      {b.logoImgSrc ? (
+        <Img
+          src={staticFile(b.logoImgSrc)}
+          style={{
+            position: "absolute",
+            top: 60,
+            right: 48,
+            width: b.logoImgWidth ?? 200,
+            height: "auto",
+            filter: "drop-shadow(0 4px 14px rgba(0,0,0,0.45))",
+          }}
+        />
+      ) : b.logoText ? (
         <div
           style={{
             position: "absolute",
@@ -54,7 +74,7 @@ export const Portada: React.FC<{
         >
           {b.logoText}
         </div>
-      )}
+      ) : null}
 
       {/* Velo navy difuminado: desenfoca lo que hay detrás y lo tiñe con el navy de
           marca. SUTIL y TRANSICIONAL — el mask con alfas intermedios disuelve el
@@ -68,8 +88,7 @@ export const Portada: React.FC<{
           height: "58%",
           backdropFilter: "blur(18px)",
           WebkitBackdropFilter: "blur(18px)",
-          background:
-            "linear-gradient(to top, rgba(15,33,53,0.62) 0%, rgba(15,33,53,0.50) 30%, rgba(15,33,53,0.28) 60%, rgba(15,33,53,0.10) 82%, rgba(15,33,53,0) 100%)",
+          background: `linear-gradient(to top, rgba(${rgb},0.62) 0%, rgba(${rgb},0.50) 30%, rgba(${rgb},0.28) 60%, rgba(${rgb},0.10) 82%, rgba(${rgb},0) 100%)`,
           maskImage:
             "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 20%, rgba(0,0,0,0.72) 46%, rgba(0,0,0,0.34) 72%, rgba(0,0,0,0) 100%)",
           WebkitMaskImage:

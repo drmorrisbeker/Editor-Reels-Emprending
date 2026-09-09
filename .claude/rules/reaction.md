@@ -24,19 +24,19 @@ frame del clip de opinión (cara full-screen).
 1. **Paso 0 — marca** (preguntar; ver `plantillas.md`) → prop `brand`.
 2. `bash scripts/new_project.sh <nombre>` (crea carpetas, resetea Root/Reel a plantilla en
    blanco con AMBAS composiciones). Mover los 3 crudos a `Crudos/`.
-3. **source**: recortar el video reaccionado al tramo deseado → `ediciones/source.mp4`
+3. **source**: recortar el video reaccionado al tramo deseado → `Ediciones/source.mp4`
    (`scripts/cut_clip`/ffmpeg si hace falta). Debe durar ≥ `splitBlockSeconds`.
 4. **clip_react**: cortar silencios del video "yo reaccionando" con `scripts/remove_silences.py`
-   → `ediciones/clip_react.mp4`. Su duración final = **`splitBlockSeconds`**.
+   → `Ediciones/clip_react.mp4`. Su duración final = **`splitBlockSeconds`**.
 5. **clip_opinion**: cortar silencios del video "yo opinión" (igual que yapping, cierre con
-   la última palabra completa + ~400ms) → `ediciones/clip_opinion.mp4`.
-6. **Transcribir** por separado (mi voz): `node scripts/transcribe.mjs ediciones/clip_react.mp4`
-   y `node scripts/transcribe.mjs ediciones/clip_opinion.mp4` → dos `*_captions.json`.
+   la última palabra completa + ~400ms) → `Ediciones/clip_opinion.mp4`.
+6. **Transcribir** por separado (mi voz): `node scripts/transcribe.mjs Ediciones/clip_react.mp4`
+   y `node scripts/transcribe.mjs Ediciones/clip_opinion.mp4` → dos `*_captions.json`.
 7. **Unir captions** con offset del bloque split:
    ```bash
    node scripts/reaction_captions_merge.mjs \
-     ediciones/clip_react_captions.json ediciones/clip_opinion_captions.json <splitBlockMs> \
-     > ediciones/clip_reaccion_captions.json
+     Ediciones/clip_react_captions.json Ediciones/clip_opinion_captions.json <splitBlockMs> \
+     > Ediciones/clip_reaccion_captions.json
    ```
    `splitBlockMs` = duración de `clip_react.mp4` en ms. Revisar el JSON unido contra el audio
    (misma revisión de captions que base.md: alucinaciones, zero-duration, capitalizar inicios
@@ -45,11 +45,11 @@ frame del clip de opinión (cara full-screen).
    marca-aware) y esperar OK. No hay escenas ni zoom en reacción.
 9. **Root.tsx** → completar `reactionDefaultProps`: `brand`, `reactVideoSrc`, `sourceVideoSrc`,
    `sourceVolume`, `splitBlockSeconds`, `opinionVideoSrc`, `captionsSrc`, `hookText`,
-   `portadaBgMs` (`node scripts/portada_bg_pick.mjs ediciones/clip_opinion_captions.json`),
+   `portadaBgMs` (`node scripts/portada_bg_pick.mjs Ediciones/clip_opinion_captions.json`),
    `durationSeconds` = `splitBlockSeconds` + duración de `clip_opinion`.
 10. **Render**:
     ```bash
-    npx remotion render Plantilla-DrBeker-Reaccion public/proyectos/<nombre>/final/<nombre>.mp4
+    npx remotion render Plantilla-DrBeker-Reaccion public/proyectos/<nombre>/Final/<nombre>.mp4
     ```
 11. **Renombrar carpeta** a kebab-case descriptivo (nunca dejar fecha) y actualizar rutas en
     Root.tsx. Confirmar la ruta final.

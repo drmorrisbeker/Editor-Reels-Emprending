@@ -9,7 +9,7 @@ import { z } from "zod";
 // en la opinión, solo mi voz. Se subtitula mi voz (captions ya unidos con offset).
 export const ReactionPropsSchema = z.object({
   // Marca / plantilla (ver src/brand.ts y .claude/rules/plantillas.md).
-  brand: z.enum(["beker", "clubdeterapia"]).default("beker"),
+  brand: z.enum(["beker", "clubdeterapia", "foropsiquiatria"]).default("beker"),
 
   // Bloque split
   reactVideoSrc: z.string(), // YO reaccionando (arriba, 40%) — ya sin silencios

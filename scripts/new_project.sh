@@ -4,7 +4,7 @@
 #   1) Snapshot no destructivo del src/Reel.tsx + src/Root.tsx actuales (si no están ya
 #      en blanco), para no perder el estado del video anterior si no se archivó.
 #   2) Resetea src/Reel.tsx y src/Root.tsx a la plantilla en blanco (templates/).
-#   3) Crea public/proyectos/<nombre>/{Crudos,ediciones,final}/.
+#   3) Crea public/proyectos/<nombre>/{Crudos,Ediciones,Final}/.
 # Así cada video empieza sin arrastrar zoom/sonidos/escenas/portada del anterior.
 set -euo pipefail
 NAME="${1:?uso: new_project.sh <nombre>}"
@@ -34,6 +34,6 @@ cp "$TPL_ROOT" "$ROOT"
 echo "src/Reel.tsx y src/Root.tsx reseteados a la plantilla en blanco"
 
 # 3) Estructura del proyecto nuevo
-mkdir -p "public/proyectos/$NAME"/{Crudos,ediciones,final}
-echo "creado public/proyectos/$NAME/{Crudos,ediciones,final}"
+mkdir -p "public/proyectos/$NAME"/{Crudos,Ediciones,Final}
+echo "creado public/proyectos/$NAME/{Crudos,Ediciones,Final}"
 echo "listo. Mové el crudo a public/proyectos/$NAME/Crudos/ y seguí el workflow (base.md)."

@@ -14,8 +14,8 @@ import { Reaction } from "./Reaction";
 import { ReactionPropsSchema } from "./reactionSchema";
 
 const reelDefaultProps = {
-  videoSrc: "proyectos/<nombre>/ediciones/clip_edit.mp4", // ← COMPLETAR
-  captionsSrc: "proyectos/<nombre>/ediciones/clip_edit_captions.json", // ← COMPLETAR
+  videoSrc: "proyectos/<nombre>/Ediciones/clip_edit.mp4", // ← COMPLETAR
+  captionsSrc: "proyectos/<nombre>/Ediciones/clip_edit_captions.json", // ← COMPLETAR
   bgMusicSrc: "", // opcional: ruta a un mp3 en public/ (música muy sutil, vol 0.02)
   brand: "beker" as const, // ← COMPLETAR (marca: "beker" | "clubdeterapia" — la skill lo pregunta al arranque)
   hookText: "Gancho de los primeros segundos", // ← COMPLETAR (dolor concreto / pregunta urgente)
@@ -32,12 +32,12 @@ const reelDefaultProps = {
 // reel-REACCIÓN — bloques fijos: split (arriba 40% yo / abajo 60% reaccionado) → opinión full-screen.
 const reactionDefaultProps = {
   brand: "beker" as const, // ← COMPLETAR
-  reactVideoSrc: "proyectos/<nombre>/ediciones/clip_react.mp4", // ← COMPLETAR (yo reaccionando, editado)
-  sourceVideoSrc: "proyectos/<nombre>/ediciones/source.mp4", // ← COMPLETAR (video al que reacciono)
+  reactVideoSrc: "proyectos/<nombre>/Ediciones/clip_react.mp4", // ← COMPLETAR (yo reaccionando, editado)
+  sourceVideoSrc: "proyectos/<nombre>/Ediciones/source.mp4", // ← COMPLETAR (video al que reacciono)
   sourceVolume: 0.5,
   splitBlockSeconds: 30, // ← COMPLETAR (duración del clip de reacción editado)
-  opinionVideoSrc: "proyectos/<nombre>/ediciones/clip_opinion.mp4", // ← COMPLETAR (yo full-screen)
-  captionsSrc: "proyectos/<nombre>/ediciones/clip_reaccion_captions.json", // ← COMPLETAR (react+opinión unidos)
+  opinionVideoSrc: "proyectos/<nombre>/Ediciones/clip_opinion.mp4", // ← COMPLETAR (yo full-screen)
+  captionsSrc: "proyectos/<nombre>/Ediciones/clip_reaccion_captions.json", // ← COMPLETAR (react+opinión unidos)
   bgMusicSrc: "",
   hookText: "Gancho de la reacción", // ← COMPLETAR
   titleCardDurationMs: 5000,

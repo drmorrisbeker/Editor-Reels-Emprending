@@ -3,15 +3,15 @@ Composición: `Plantilla-DrBeker-Reels` | 1080×1920 @ 30fps | h264
 
 ## Flujo (10 pasos)
 1. Video crudo: usar la ruta del video que pase el usuario (carpeta de crudos/screencasts propia)
-2. Crear `public/proyectos/<nombre>/{Crudos,ediciones,final}/` y mover el video crudo a `Crudos/`
+2. Crear `public/proyectos/<nombre>/{Crudos,Ediciones,Final}/` y mover el video crudo a `Crudos/`
 3. Detect silences: `ffmpeg -i input.mp4 -af silencedetect=noise=-35dB:d=2.0 -f null -` — PAD_SEC=0.15
 4. Cut: `scripts/remove_silences.py` → `clip_edit.mp4` (editar `INPUT`/`OUTPUT`/`SILENCE` en el script o en una copia `scripts/_rs_tmp.py`). Desde 2026-09-08 el script **agrega solo el tramo final** (del último silencio al fin del archivo) — ya no hace falta pegar un "marcador de fin" en `SILENCE`, y sin silencios conserva el archivo entero.
    **Cierre del video:** Siempre verificar que el último segmento incluya la palabra final completa más ~300–500ms de silencio de impacto después. El Dr. cierra con una frase contundente — cortarla a mitad o sin silencio de asiento arruina el remate. Extender el último segmento si hace falta. **CRÍTICO: No aplicar un corte de silencio que tape la última palabra** — si la última sílaba cae dentro de un silencio detectado, mantenerla completa y agregar el buffer manualmente en el segmento final antes de correr `remove_silences.py`.
 5. 2da pasada: revisar silencios residuales (<300ms tras frases clave), cortar con ffmpeg filter_complex concat
-6. Transcribe: `node scripts/transcribe.mjs public/proyectos/<nombre>/ediciones/<clip>.mp4` (whisper **large-v3 con división por palabra** desde 2026-09-08 — `medium` derivaba los timestamps; `--model medium` para volver) — `<clip>` es `clip_edit2` si hubo 2da pasada, `clip_edit` si no. Escribe `<clip>_captions.json` al lado del video; **todos los scripts de este documento y de la skill leen ese mismo archivo** (usar el nombre del clip que se transcribió, no uno fijo).
+6. Transcribe: `node scripts/transcribe.mjs public/proyectos/<nombre>/Ediciones/<clip>.mp4` (whisper **large-v3 con división por palabra** desde 2026-09-08 — `medium` derivaba los timestamps; `--model medium` para volver) — `<clip>` es `clip_edit2` si hubo 2da pasada, `clip_edit` si no. Escribe `<clip>_captions.json` al lado del video; **todos los scripts de este documento y de la skill leen ese mismo archivo** (usar el nombre del clip que se transcribió, no uno fijo).
 7. Revisar captions: corregir alucinaciones, fusionar tokens, ajustar zero-duration (`endMs = startMs + 50`)
 8. Root.tsx: `videoSrc`, `captionsSrc`, `bgMusicSrc`, `hookText`, `titleCardDurationMs`, `durationSeconds`
-9. Render: `npx remotion render Plantilla-DrBeker-Reels public/proyectos/<nombre>/final/<nombre>.mp4`
+9. Render: `npx remotion render Plantilla-DrBeker-Reels public/proyectos/<nombre>/Final/<nombre>.mp4`
 10. **Cierre/archivado (SOLO con confirmación del usuario, video ya terminado y aprobado).**
     `public/` no debe acumular videos: lo que Remotion no necesita renderizar, sale de `public/` (si no,
     cada bundle copia GB de más). Al cerrar un reel, **preguntar** "¿archivo este proyecto?" y si confirma:
@@ -19,12 +19,12 @@ Composición: `Plantilla-DrBeker-Reels` | 1080×1920 @ 30fps | h264
     bash scripts/archive_project.sh <nombre>
     ```
     Divide el proyecto en dos, **ambos fuera de `public/`** (nada se borra, todo recuperable):
-    - `Crudos/` + `ediciones/` (material de trabajo pesado) → `_archivo/<nombre>/`
-    - `final/` + `caption.txt` (el entregable) → `Finales/<nombre>/`
+    - `Crudos/` + `Ediciones/` (material de trabajo pesado) → `_archivo/<nombre>/`
+    - `Final/` + `caption.txt` (el entregable) → `Finales/<nombre>/`
     - snapshot de `src/Reel.tsx` + `src/Root.tsx` → `_archivo/<nombre>/src/` y **reset del
       código a la plantilla en blanco** (`templates/`), para que el próximo video arranque limpio.
     Y elimina la carpeta `public/proyectos/<nombre>/` ya vacía. Para re-renderizar más tarde, mover de
-    vuelta `_archivo/<nombre>/{Crudos,ediciones}` a `public/proyectos/<nombre>/`. **Nunca correr este paso
+    vuelta `_archivo/<nombre>/{Crudos,Ediciones}` a `public/proyectos/<nombre>/`. **Nunca correr este paso
     sin confirmación** ni con un render pendiente o sin aprobar.
 
 ## Subtitles
@@ -49,7 +49,7 @@ un velo navy difuminado que sale del borde inferior. La **identidad la define la
 - **Velo SUTIL y TRANSICIONAL** (se sigue viendo la foto): `backdropFilter: blur(18px)` en la mitad inferior + `background` en degradé navy (opacidad máx ~0.62) + `maskImage` largo con alfas intermedios que disuelve el desenfoque hacia arriba en vez de cortar con línea. La legibilidad la sostiene el `textShadow` doble, no la opacidad.
 - Wired: `<Sequence from={0} durationInFrames={2}><Portada ... brand={b} /></Sequence>`
 
-`portadaBgMs` — correr `node scripts/portada_bg_pick.mjs public/proyectos/<nombre>/ediciones/<clip>_captions.json`
+`portadaBgMs` — correr `node scripts/portada_bg_pick.mjs public/proyectos/<nombre>/Ediciones/<clip>_captions.json`
 y usar el `startMs` que imprime en Root.tsx.
 
 ## ThumbnailCover

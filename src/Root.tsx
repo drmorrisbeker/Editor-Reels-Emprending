@@ -15,8 +15,8 @@ const SobreestimuladosPortada: React.FC = () => (
 );
 
 const reelDefaultProps = {
-  videoSrc: "proyectos/ansiedad-no-se-elimina/ediciones/clip_edit.mp4",
-  captionsSrc: "proyectos/ansiedad-no-se-elimina/ediciones/clip_edit_captions.json",
+  videoSrc: "proyectos/ansiedad-no-se-elimina/Ediciones/clip_edit.mp4",
+  captionsSrc: "proyectos/ansiedad-no-se-elimina/Ediciones/clip_edit_captions.json",
   bgMusicSrc: "",
   brand: "beker" as const,
   hookText: "Si querés dejar de sentir ansiedad, vas a fracasar",
@@ -33,12 +33,12 @@ const reelDefaultProps = {
 // Defaults del reel-REACCIÓN (placeholder: apunta al mismo clip para que el studio abra).
 const reactionDefaultProps = {
   brand: "beker" as const,
-  reactVideoSrc: "proyectos/ansiedad-no-se-elimina/ediciones/clip_edit.mp4",
-  sourceVideoSrc: "proyectos/ansiedad-no-se-elimina/ediciones/clip_edit.mp4",
+  reactVideoSrc: "proyectos/ansiedad-no-se-elimina/Ediciones/clip_edit.mp4",
+  sourceVideoSrc: "proyectos/ansiedad-no-se-elimina/Ediciones/clip_edit.mp4",
   sourceVolume: 0.5,
   splitBlockSeconds: 30,
-  opinionVideoSrc: "proyectos/ansiedad-no-se-elimina/ediciones/clip_edit.mp4",
-  captionsSrc: "proyectos/ansiedad-no-se-elimina/ediciones/clip_edit_captions.json",
+  opinionVideoSrc: "proyectos/ansiedad-no-se-elimina/Ediciones/clip_edit.mp4",
+  captionsSrc: "proyectos/ansiedad-no-se-elimina/Ediciones/clip_edit_captions.json",
   bgMusicSrc: "",
   hookText: "Reaccioné a esto y no lo podía creer",
   titleCardDurationMs: 5000,

@@ -2,8 +2,8 @@
 # archive_project.sh <nombre-proyecto>
 # Paso de CIERRE de un reel (correr SOLO con confirmación del usuario, video ya terminado).
 # Divide el proyecto en dos para sacarlo del bundle de Remotion sin perder nada:
-#   1) Crudos/ + ediciones/  (material de trabajo pesado) → _archivo/<nombre>/
-#   2) final/ + caption.txt   (el entregable)             → Finales/<nombre>/   (fuera de public/)
+#   1) Crudos/ + Ediciones/  (material de trabajo pesado) → _archivo/<nombre>/
+#   2) Final/ + caption.txt   (el entregable)             → Finales/<nombre>/   (fuera de public/)
 # Luego elimina la carpeta public/proyectos/<nombre>/ si quedó vacía.
 # Ambos destinos viven FUERA de public/, así Remotion deja de copiarlos en cada bundle.
 # Nada se borra (salvo la carpeta del proyecto si quedó vacía): todo queda recuperable.
@@ -18,7 +18,7 @@ FIN="$VR/Finales/$NAME"
 mkdir -p "$ARCH" "$FIN"
 
 # 1) material de trabajo → _archivo/
-for d in Crudos ediciones; do
+for d in Crudos Ediciones; do
   [ -e "$SRC/$d" ] && mv "$SRC/$d" "$ARCH/" && echo "archivado: $d → _archivo/$NAME/"
 done
 
@@ -34,7 +34,7 @@ if [ -f "$VR/templates/Reel.template.tsx" ] && [ -f "$VR/templates/Root.template
 fi
 
 # 2) entregable → Finales/
-[ -e "$SRC/final" ] && mv "$SRC/final" "$FIN/" && echo "entregable: final/ → Finales/$NAME/"
+[ -e "$SRC/Final" ] && mv "$SRC/Final" "$FIN/" && echo "entregable: Final/ → Finales/$NAME/"
 for f in "$SRC"/caption.txt "$SRC"/*.txt; do
   [ -e "$f" ] && mv "$f" "$FIN/" && echo "entregable: $(basename "$f") → Finales/$NAME/"
 done
@@ -46,4 +46,4 @@ if [ -n "$(ls -A "$SRC" 2>/dev/null)" ]; then
 fi
 rmdir "$SRC" 2>/dev/null && echo "carpeta public/proyectos/$NAME/ eliminada (vacía)" || true
 
-echo "listo. Crudos/ediciones en _archivo/$NAME · final en Finales/$NAME"
+echo "listo. Crudos/Ediciones en _archivo/$NAME · Final en Finales/$NAME"

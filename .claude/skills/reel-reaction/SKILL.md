@@ -15,8 +15,9 @@ Leer en este orden antes de continuar:
 inicio** — se define después de transcribir. **No leer** `yapping.md` ni el catálogo de
 escenas: la reacción no usa zoom, escenas ni rehook.
 
-**Paso 0 — Marca (gating, preguntar SIEMPRE):** ¿Morris Beker o Club de Terapia? → prop
-`brand` (`"beker"` | `"clubdeterapia"`). Detalle en `plantillas.md`.
+**Paso 0 — Marca (gating, preguntar SIEMPRE):** ¿Morris Beker, Club de Terapia o Foro
+Psiquiatría? → prop `brand` (`"beker"` | `"clubdeterapia"` | `"foropsiquiatria"`). Detalle en
+`plantillas.md`.
 
 Si el mensaje no incluye los videos, pedir los **3 crudos**: (1) el video al que reacciono,
 (2) yo reaccionando, (3) yo dando mi opinión. Preguntar también: **¿música de fondo?**
@@ -36,7 +37,7 @@ Presentar en un solo mensaje, para aprobación:
 Esperar OK. (No hay escenas ni zoom en reacción — no proponerlos.)
 
 ### Render y cierre
-- Render: `npx remotion render Plantilla-DrBeker-Reaccion public/proyectos/<nombre>/final/<nombre>.mp4`
+- Render: `npx remotion render Plantilla-DrBeker-Reaccion public/proyectos/<nombre>/Final/<nombre>.mp4`
 - **Paso final obligatorio:** renombrar la carpeta a kebab-case descriptivo (nunca fecha) y
   actualizar `reactVideoSrc`/`sourceVideoSrc`/`opinionVideoSrc`/`captionsSrc` en Root.tsx.
 - **Caption para redes** (base.md): preguntar primero **¿CTA engagement o lead magnet?**,

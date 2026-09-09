@@ -10,21 +10,21 @@ Leer en este orden antes de continuar:
 Si el mensaje no incluye ruta del video, pedirla antes de continuar. **No pedir el hook text al inicio** — se define después de transcribir.
 
 **Paso 0 — Marca / plantilla (gating obligatorio, preguntar SIEMPRE al arranque):**
-Preguntar **¿Morris Beker o Club de Terapia?** No asumir. El valor va en el prop `brand` de
-Root.tsx (`"beker"` | `"clubdeterapia"`). Cada marca cambia tipografía de portada, acento,
+Preguntar **¿Morris Beker, Club de Terapia o Foro Psiquiatría?** No asumir. El valor va en el
+prop `brand` de Root.tsx (`"beker"` | `"clubdeterapia"` | `"foropsiquiatria"`). Cada marca cambia tipografía de portada, acento,
 portada y cartel de gancho; los subtítulos son iguales. **Detalle de cada marca en
 `.claude/rules/plantillas.md`** (leerlo solo acá, al elegir). Config en `src/brand.ts`.
 
 Al recibir la ruta del video:
 1. Arrancar el proyecto con estado limpio: `bash scripts/new_project.sh <nombre>` — crea
-   `public/proyectos/<nombre>/{Crudos,ediciones,final}/` y **resetea `src/Reel.tsx` y
+   `public/proyectos/<nombre>/{Crudos,Ediciones,Final}/` y **resetea `src/Reel.tsx` y
    `src/Root.tsx` a la plantilla en blanco** (guardando snapshot del video anterior si no
    se archivó). Esto evita arrastrar zoom/sonidos/escenas del video previo.
 2. Mover el video crudo a `public/proyectos/<nombre>/Crudos/` con `mv`
 3. Usar esa ruta como `input.mp4` en todos los pasos siguientes
 
 > **Eficiencia:** no leer el cuerpo de toda `src/components/scenes/` (crece con cada
-> video). El catálogo de scenes está en `yapping.md`; abrir solo la que se vaya a reutilizar.
+> video). El catálogo de scenes está en `.claude/rules/scenes.md`; abrir solo la que se vaya a reutilizar.
 
 Preguntar también: **¿Querés agregar música de fondo?** Si sí, pedir la ruta del archivo. La música debe ser muy sutil, de fondo (`volume: 0.02`) sin tapar la voz. Copiar el mp3 a la carpeta del proyecto en `public/` y setear `bgMusicSrc` en Root.tsx.
 
@@ -35,7 +35,7 @@ Seguir los pasos 1–7 de base.md (cortar silencios → transcribir → revisar 
 **Detección de frases repetidas (parte del paso 7):** Antes de proponer títulos, correr el script para detectar secuencias de 3 palabras que aparezcan más de una vez. `<clip>` es el nombre del video transcripto en el paso 6 (`clip_edit2` si hubo 2da pasada, `clip_edit` si no):
 
 ```bash
-node scripts/detect_repeats.mjs public/proyectos/<nombre>/ediciones/<clip>_captions.json
+node scripts/detect_repeats.mjs public/proyectos/<nombre>/Ediciones/<clip>_captions.json
 ```
 
 Si hay repeticiones, **no eliminar automáticamente** — reportarlas al usuario con los segundos de cada ocurrencia y preguntar cuál conservar. El Dr. puede haberse equivocado al grabar o puede ser repetición retórica intencional.

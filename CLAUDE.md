@@ -1,7 +1,7 @@
 # Reels — Plantilla Dr. Beker
 
-Editor de reels verticales (1080×1920) con Remotion. Dos tipos de reel y **dos marcas**
-(Morris Beker / Club de Terapia, prop `brand`).
+Editor de reels verticales (1080×1920) con Remotion. Dos tipos de reel y **tres marcas**
+(Morris Beker / Club de Terapia / Foro Psiquiatría, prop `brand`; ver `.claude/rules/plantillas.md`).
 
 **Cómo empezar:**
 - Si no está claro el tipo, usar el agente **`reel-editor`**: pregunta la marca, detecta el
@@ -12,4 +12,4 @@ Editor de reels verticales (1080×1920) con Remotion. Dos tipos de reel y **dos 
 **Reglas (`.claude/rules/`, fuente de verdad):**
 `base.md` (común: subtítulos, portada, gancho, marca, caption) · `yapping.md` (zoom/escenas) ·
 `reaction.md` (split/opinión) · `plantillas.md` (marcas, on-demand) · `scenes.md` (catálogo de
-escenas reutilizables). Config de marcas en código: `src/brand.ts`. Setup: ver `SETUP.md`.
+escenas reutilizables). Config de marcas en código: `src/brand.ts`. Setup: ver `SETUP.md`. **Mapa del repo (dónde está cada cosa): `ESTRUCTURA.md`.**
