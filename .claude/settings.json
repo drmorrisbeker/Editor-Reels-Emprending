@@ -8,6 +8,10 @@
       "Bash(node *)",
       "Bash(python3 *)",
       "Bash(ffprobe *)",
+      "Bash(bash scripts/*)",
+      "Bash(mv *)",
+      "Bash(cp *)",
+      "Bash(mkdir *)",
       "mcp__buffer__list_posts",
       "Bash(xdg-open *)"
     ]
