@@ -1,30 +1,42 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// PLANTILLA EN BLANCO — Reel.tsx
+// Copiar sobre src/Reel.tsx al empezar un video nuevo (lo hace scripts/new_project.sh).
+// Conserva TODOS los mecanismos del diseño (zoom sostenido, portada-bg, gradiente,
+// clicks, ThumbnailCover, subtítulos). Solo hay que completar los VALORES por-video
+// marcados con  ← COMPLETAR.  No borrar los mecanismos.
+// Reglas de estilo/animación: .claude/rules/base.md + .claude/rules/yapping.md
+// ─────────────────────────────────────────────────────────────────────────────
 import { AbsoluteFill, Audio, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { Video } from "@remotion/media";
 import { ThumbnailCover } from "./components/ThumbnailCover";
 import { Portada } from "./components/Portada";
 import { Subtitles } from "./components/Subtitles";
+// Escenas / rehook: importar SOLO las que se usen en este video (ver bloque comentado abajo).
 import { RehookScene } from "./components/RehookScene";
-import { FlujoCausalScene } from "./components/scenes/FlujoCausalScene";
-import { EliminarVsRegularScene } from "./components/scenes/EliminarVsRegularScene";
+import { NombreConceptoScene } from "./components/scenes/NombreConceptoScene";
 import type { ReelProps } from "./schema";
 
 const RAMP_MS = 200;
-// Zoom sostenido: entra en el inicio de la frase, se mantiene en el pico durante
-// toda la frase de impacto, y se aleja recién cuando la frase termina.
-const ZOOM_PHRASES = [
-  { startMs: 4550, endMs: 5710, scale: 1.10 },   // "vas a fracasar"
-  { startMs: 13300, endMs: 14000, scale: 1.08 }, // "una emoción humana"
-  { startMs: 26660, endMs: 28140, scale: 1.09 }, // "cumple una función... protegernos"
-  { startMs: 35200, endMs: 36430, scale: 1.10 }, // "amenazas reales o imaginarias"
-  { startMs: 58170, endMs: 60160, scale: 1.12 }, // "decidir dejar de ser humano"
-  { startMs: 88000, endMs: 91450, scale: 1.14 }, // cierre "eso sí es lo que buscamos" (pico)
+// Zoom sostenido: entra al inicio de la frase de impacto, se mantiene en el pico durante
+// toda la frase, y se aleja recién cuando termina. endMs = fin real de la frase (sacarlo
+// de los captions, no inventar ventanas de ~1s). 6–8 por video, escala 1.08–1.14, máximo
+// al cierre. Ver .claude/rules/yapping.md.
+const ZOOM_PHRASES: { startMs: number; endMs: number; scale: number }[] = [
+  { startMs: 11620, endMs: 13380, scale: 1.09 }, // "trastornos límite a la personalidad" (nombra el tema)
+  { startMs: 17340, endMs: 21840, scale: 1.10 }, // "más intentos de suicidio y más intentos autogresivos reportados"
+  { startMs: 21840, endMs: 24960, scale: 1.12 }, // REVELACIÓN: "Y ella misma padecía TLP"
+  { startMs: 32200, endMs: 33500, scale: 1.12 }, // "...también la padecía" (paradoja)
+  { startMs: 57490, endMs: 60600, scale: 1.11 }, // "no tienen que ser entes sublimes y perfectos"
+  { startMs: 62680, endMs: 64740, scale: 1.11 }, // "pero sí tienen que saber tratarlo"
+  { startMs: 68520, endMs: 72080, scale: 1.14 }, // CIERRE: "gracias a haber atravesado esto en carne propia" (zoom máximo)
 ];
 
-const PHRASE_SOUNDS = [
-  { ms: 5050 },  // "fracasar"
-  { ms: 13300 }, // "humana"
-  { ms: 59410 }, // "humano" (dejar de ser humano)
-  { ms: 88250 }, // cierre "eso sí"
+// Clicks sutiles (sfx/click.mp3, vol 0.03) SOLO en los 4–5 momentos más contundentes
+// (los mismos que los zooms de mayor impacto + cierre). Ver .claude/rules/yapping.md.
+const PHRASE_SOUNDS: { ms: number }[] = [
+  { ms: 22050 }, // revelación ("ella misma padecía")
+  { ms: 32810 }, // "también la padecía"
+  { ms: 68520 }, // cierre ("gracias a haber atravesado")
 ];
 
 const VideoWithZoom: React.FC<{ src: string }> = ({ src }) => {
@@ -90,9 +102,7 @@ export const Reel: React.FC<ReelProps> = ({
         </Sequence>
       )}
 
-      {bgMusicSrc && (
-        <Audio src={staticFile(bgMusicSrc)} volume={0.02} />
-      )}
+      {bgMusicSrc && <Audio src={staticFile(bgMusicSrc)} volume={0.02} />}
 
       <AbsoluteFill
         style={{
@@ -122,26 +132,33 @@ export const Reel: React.FC<ReelProps> = ({
 
       <Subtitles captionsSrc={captionsSrc} />
 
-      {/* Escenas y rehook van por encima de los subtítulos (los tapan mientras duran) */}
+      {/* ─────────────────────────────────────────────────────────────────────
+          ESCENAS DE CONCEPTO / REHOOK (opcional — van por encima de los subtítulos).
+          Patrón: N <Sequence> cortas independientes (90 frames c/u), nunca antes de
+          los 3s, nunca al cierre. Timestamps en ms del clip editado. Importar arriba
+          solo la scene que se use. Ejemplo:
 
-      {/* Escena A — flujo causal de la función de la ansiedad (~38s) */}
-      <Sequence from={s(38000, fps)} durationInFrames={90}>
-        <FlujoCausalScene
-          label1="AMENAZA"
-          label2="ANSIEDAD"
-          sub2="activa el cuerpo"
-          label3="ENFRENTAR O HUIR"
+          <Sequence from={s(38000, fps)} durationInFrames={90}>
+            <NumeroConceptoScene numero="1" linea1="LÍNEA UNO" linea2="LÍNEA DOS" />
+          </Sequence>
+
+          <Sequence from={s(55500, fps)} durationInFrames={50}>
+            <RehookScene linea1="Frase que" linea2="tensiona el" acento="GANCHO" />
+          </Sequence>
+          ───────────────────────────────────────────────────────────────────── */}
+
+      {/* Escena Marsha Linehan — cuando Morris la presenta como creadora de la DBT (~4.7s) */}
+      <Sequence from={s(4710, fps)} durationInFrames={85}>
+        <NombreConceptoScene
+          nombre="Marsha Linehan"
+          concepto="Creadora de la DBT"
+          detalle="La terapia con más evidencia para el trastorno límite de personalidad"
         />
       </Sequence>
 
-      {/* Rehook — coincide exacto con "decidir dejar de ser humano" (~55.5s) */}
-      <Sequence from={s(55500, fps)} durationInFrames={50}>
-        <RehookScene linea1="Eliminar la ansiedad" linea2="es decidir" acento="DEJAR DE SER HUMANO" />
-      </Sequence>
-
-      {/* Escena B — eliminar vs regular (~69s) */}
-      <Sequence from={s(69000, fps)} durationInFrames={90}>
-        <EliminarVsRegularScene />
+      {/* Rehook — coincide con "no tienen que ser perfectos, pero sí saber tratarlo" (~60.3s) */}
+      <Sequence from={s(60160, fps)} durationInFrames={55}>
+        <RehookScene linea1="No tienen que ser perfectos," linea2="pero sí" acento="SABER TRATARLO" />
       </Sequence>
     </AbsoluteFill>
   );

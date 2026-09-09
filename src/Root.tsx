@@ -1,49 +1,29 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// PLANTILLA EN BLANCO — Root.tsx
+// Copiar sobre src/Root.tsx al empezar un video nuevo (lo hace scripts/new_project.sh).
+// Solo la composición Plantilla-DrBeker-Reels con defaults genéricos. Completar los
+// valores por-video en reelDefaultProps (marcados con ← COMPLETAR) tras revisar captions.
+// ─────────────────────────────────────────────────────────────────────────────
 import "./index.css";
 import { Composition } from "remotion";
 import { Reel } from "./Reel";
 import { ReelPropsSchema } from "./schema";
-import { Portada } from "./components/Portada";
-
-const FluoxetinaPortada: React.FC = () => (
-  <Portada titulo="FLUOXETINA:" linea2="3 DATOS" bgSrc="proyectos/fluoxetina-3-cosas/portada-bg.png" />
-);
-
-const SobreestimuladosPortada: React.FC = () => (
-  <Portada titulo="PERDIMOS" linea2="EL ABURRIMIENTO." bgSrc="proyectos/sobreestimulados-ansiedad-y-presente/portada-bg.png" />
-);
 
 const reelDefaultProps = {
-  videoSrc: "proyectos/ansiedad-no-se-elimina/ediciones/clip_edit.mp4",
-  captionsSrc: "proyectos/ansiedad-no-se-elimina/ediciones/clip_edit_captions.json",
-  bgMusicSrc: "",
-  hookText: "Si querés dejar de sentir ansiedad, vas a fracasar",
-  titleCardDurationMs: 5000,
-  portadaBgMs: 10770,
-  portadaTitulo: "DEJAR DE SENTIR",
-  portadaLinea2: "ANSIEDAD?",
+  videoSrc: "proyectos/creadora-dbt-la-padecia/ediciones/clip_edit2.mp4",
+  captionsSrc: "proyectos/creadora-dbt-la-padecia/ediciones/clip_edit2_captions.json",
+  bgMusicSrc: "", // sin música (decisión de Morris)
+  hookText: "La creadora de la mejor terapia también la padecía",
+  titleCardDurationMs: 3500,
+  portadaBgMs: 8280,
+  portadaTitulo: "LOS MEJORES TERAPEUTAS",
+  portadaLinea2: "TAMBIÉN SUFREN",
   overlays: [],
-  durationSeconds: 92.4,
+  durationSeconds: 72.92,
 };
 
 export const RemotionRoot: React.FC = () => {
   return (
-    <>
-    <Composition
-      id="PortadaOnly"
-      component={FluoxetinaPortada}
-      durationInFrames={2}
-      fps={30}
-      width={1080}
-      height={1920}
-    />
-    <Composition
-      id="SobreestimuladosPortada"
-      component={SobreestimuladosPortada}
-      durationInFrames={2}
-      fps={30}
-      width={1080}
-      height={1920}
-    />
     <Composition
       id="Plantilla-DrBeker-Reels"
       component={Reel}
@@ -57,6 +37,5 @@ export const RemotionRoot: React.FC = () => {
         durationInFrames: Math.round(props.durationSeconds * 30),
       })}
     />
-    </>
   );
 };
