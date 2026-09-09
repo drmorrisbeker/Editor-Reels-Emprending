@@ -16,8 +16,8 @@ const reelDefaultProps = {
   hookText: "Gancho de los primeros segundos", // ← COMPLETAR (dolor concreto / pregunta urgente)
   titleCardDurationMs: 5000,
   portadaBgMs: 8000, // ← COMPLETAR (usar el "portadaBgMs candidato" de ediciones/transcript_resumen.md, lo calcula scripts/captions_resumen.mjs)
-  portadaTitulo: "", // ← COMPLETAR (título de portada)
-  portadaLinea2: "", // ← COMPLETAR (segunda línea / gancho de portada)
+  portadaTitulo: "", // ← COMPLETAR (línea chica de contexto, uppercase)
+  portadaLinea2: "", // ← COMPLETAR (línea(s) grande(s) de remate; usar " / " para dos líneas)
   overlays: [],
   durationSeconds: 60, // ← COMPLETAR (duración del clip editado)
 };

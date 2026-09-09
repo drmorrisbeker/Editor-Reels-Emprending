@@ -1,11 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   AbsoluteFill,
-  interpolate,
   Sequence,
-  spring,
   staticFile,
-  useCurrentFrame,
   useVideoConfig,
   useDelayRender,
 } from "remotion";
@@ -54,7 +51,10 @@ const GAP_THRESHOLD_MS = 380;
 // Tamaño fijo de subtítulo y ancho máximo de UNA línea. Las páginas se cortan
 // también por ancho: si la próxima palabra no entra en la línea a 74px, arranca
 // una página nueva. Así nunca hay doble línea ni texto achicado.
-const CHAR_W = 46; // ancho aprox por caracter a 74px Poppins 800 (sobreestimado a propósito)
+// CHAR_W calibrado para Inter 800 74px (sobreestimado a propósito para forzar el corte
+// antes de que una página pueda envolver). Inter es algo más angosta que Poppins, así
+// que 48 es un margen conservador que garantiza una sola línea por página.
+const CHAR_W = 48;
 const WORD_GAP = 14;
 const MAX_LINE_PX = 860;
 const wordPx = (w: Word) => w.text.length * CHAR_W;
@@ -90,16 +90,9 @@ function buildPages(words: Word[]): Page[] {
   return pages;
 }
 
+// La página entera aparece JUNTA, de golpe, sin animación por palabra (look podcast-clips
+// modo "page"). Todas las palabras blancas, mismo tamaño, sin resaltado.
 const SubtitlePage: React.FC<{ page: Page }> = ({ page }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-
-  // Lead: el spring tarda ~3-4 frames en hacerse visible. Adelantamos la
-  // aparición ~90ms para que la palabra esté visible justo cuando el Dr. la dice.
-  const LEAD_MS = 90;
-
-  // Tamaño fijo + una sola línea garantizada (las páginas ya se cortaron por
-  // ancho en buildPages). nowrap evita cualquier envoltura.
   return (
     <div
       style={{
@@ -111,38 +104,23 @@ const SubtitlePage: React.FC<{ page: Page }> = ({ page }) => {
         whiteSpace: "nowrap",
       }}
     >
-      {page.words.map((word, i) => {
-        // Cada palabra se revela cuando el Dr. la dice: aparición palabra por palabra.
-        const wordStartFrame = Math.round(((word.fromMs - LEAD_MS - page.startMs) / 1000) * fps);
-        const enter = spring({
-          frame: Math.max(0, frame - wordStartFrame),
-          fps,
-          config: { damping: 20, stiffness: 340 },
-        });
-        const opacity = interpolate(enter, [0, 0.55], [0, 1], { extrapolateRight: "clamp" });
-        const y = interpolate(enter, [0, 1], [12, 0]);
-        const scale = interpolate(enter, [0, 1], [0.95, 1]);
-        return (
-          <span
-            key={i}
-            style={{
-              fontSize: 74,
-              fontWeight: 800,
-              fontFamily: "Poppins, sans-serif",
-              color: "#FFFFFF",
-              letterSpacing: "-0.01em",
-              textShadow:
-                "0 4px 18px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.45)",
-              opacity,
-              transform: `translateY(${y}px) scale(${scale})`,
-              display: "inline-block",
-              lineHeight: 1.2,
-            }}
-          >
-            {word.text}
-          </span>
-        );
-      })}
+      {page.words.map((word, i) => (
+        <span
+          key={i}
+          style={{
+            fontSize: 74,
+            fontWeight: 800,
+            fontFamily: "Inter, sans-serif",
+            color: "#FFFFFF",
+            letterSpacing: "-0.01em",
+            textShadow: "0 4px 18px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.45)",
+            display: "inline-block",
+            lineHeight: 1.2,
+          }}
+        >
+          {word.text}
+        </span>
+      ))}
     </div>
   );
 };
@@ -187,15 +165,19 @@ export const Subtitles: React.FC<{ captionsSrc: string }> = ({ captionsSrc }) =>
   const words = mergeIntoWords(clean);
   const pages = buildPages(words);
 
+  // Lead de página: adelanta la aparición ~90ms para que la página no llegue tarde
+  // respecto del audio. NO hay timing por palabra: solo se corre el inicio de la página.
+  const LEAD_MS = 90;
+
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
       {pages.map((page, i) => {
         const nextPage = pages[i + 1] ?? null;
         const endMs = nextPage ? nextPage.startMs : page.endMs + 400;
-        const startFrame = Math.round((page.startMs / 1000) * fps);
+        const startFrame = Math.max(0, Math.round(((page.startMs - LEAD_MS) / 1000) * fps));
         const durationInFrames = Math.max(
           1,
-          Math.round(((endMs - page.startMs) / 1000) * fps),
+          Math.round((endMs / 1000) * fps) - startFrame,
         );
 
         return (

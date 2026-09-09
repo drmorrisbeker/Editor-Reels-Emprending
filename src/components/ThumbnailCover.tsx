@@ -1,63 +1,69 @@
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 
-export const ThumbnailCover: React.FC<{ hookText: string; bgColor?: string }> = ({
-  hookText,
-  bgColor = "#0F2135",
-}) => {
+// Cartel de gancho (primeros ~5s, overlay sobre el video). Look derivado de podcast-clips:
+// cartel BLANCO con texto navy, redondeado, sombra suave; el texto corre centrado dentro.
+//
+// Posición: ABAJO, apoyado por encima de la banda de subtítulos (que queda fija en
+// paddingBottom 640 → banda ≈ y1190–1280). El cartel se ubica arriba de esa banda para no
+// pisarla, y su ancho se limita para no cruzar el notch de botones de TikTok/Reels
+// (x≈887 por debajo de y≈864): contenedor left:76 / right:200 → borde derecho ≈880.
+//
+// Contrato de props de vertical-reel: Reel.tsx pasa solo `hookText`. El resto son opcionales
+// con defaults (cartel blanco, texto navy).
+
+export const CARD_BOTTOM = 760; // borde inferior del cartel ≈ y1160 (arriba de la banda de subtítulos)
+
+export const ThumbnailCover: React.FC<{
+  hookText: string;
+  bgColor?: string; // fondo del cartel (blanco por default)
+  fgColor?: string; // texto del cartel (navy por default)
+}> = ({ hookText, bgColor = "#FFFFFF", fgColor = "#0F2135" }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const enter = spring({ frame, fps, config: { damping: 180 } });
   const opacity = interpolate(enter, [0, 1], [0, 1], { extrapolateRight: "clamp" });
-  const translateY = interpolate(enter, [0, 1], [-12, 0]);
+  const translateY = interpolate(enter, [0, 1], [16, 0]);
 
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
-      {/* Gradiente superior para legibilidad del texto */}
       <div
         style={{
           position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "22%",
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0) 100%)",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Texto — dentro del safe zone (top ≥245), arriba de la cabeza del Dr. */}
-      <div
-        style={{
-          position: "absolute",
-          top: 270,
-          left: 48,
-          right: 48,
-          opacity,
-          transform: `translateY(${translateY}px)`,
-          textAlign: "center",
+          bottom: CARD_BOTTOM,
+          left: 76,
+          right: 200,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        {/* Fondo de color de marca que ABRAZA cada línea (estilo IG stories):
-            box-decoration-break clone → cada línea lleva su propio panel redondeado. */}
-        <span
+        <div
           style={{
-            fontFamily: "Poppins, sans-serif",
-            fontWeight: 800,
-            fontSize: 72,
-            color: "#FFFFFF",
+            opacity,
+            transform: `translateY(${translateY}px)`,
             backgroundColor: bgColor,
-            padding: "10px 28px",
-            borderRadius: 22,
-            boxDecorationBreak: "clone",
-            WebkitBoxDecorationBreak: "clone",
-            boxShadow: "0 10px 34px rgba(0,0,0,0.3)",
-            letterSpacing: "-0.01em",
-            lineHeight: 1.45,
+            borderRadius: 26,
+            padding: "22px 34px",
+            boxShadow: "0 14px 44px rgba(0,0,0,0.38)",
+            maxWidth: "100%",
           }}
         >
-          {hookText}
-        </span>
+          <div
+            style={{
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 800,
+              fontSize: 62,
+              color: fgColor,
+              textAlign: "center",
+              letterSpacing: "-0.015em",
+              lineHeight: 1.14,
+              whiteSpace: "pre-line",
+            }}
+          >
+            {hookText}
+          </div>
+        </div>
       </div>
     </AbsoluteFill>
   );

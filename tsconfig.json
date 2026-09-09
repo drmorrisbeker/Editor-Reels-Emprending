@@ -11,5 +11,5 @@
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": true
   },
-  "exclude": ["remotion.config.ts", "templates"]
+  "exclude": ["remotion.config.ts", "templates", "node_modules", "_archivo", "Finales", "crudos", "public", "whisper.cpp"]
 }

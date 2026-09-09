@@ -36,7 +36,7 @@ Leer el resumen completo. Antes de tocar Root.tsx, Reel.tsx o renderizar, presen
 9. **Nombre de carpeta definitivo** — kebab-case por el concepto central (ej. `ansiedad-no-se-elimina`). Nunca dejar nombre de fecha.
 Si el perfil no es `morris-beker`, avisar acá que los componentes aún tienen el look por defecto (Nivel 2 pendiente).
 
-Morris puede aprobar, ajustar o descartar por partes. Anotar cada decisión en `PIPELINE.md` › `decisiones:`.
+Morris puede aprobar, ajustar o descartar por partes. **Lo que no contesta queda aprobado tal como se propuso** (regla suya, 2026-09-08): cada ítem lleva una propuesta concreta (en opciones múltiples, la primera es la recomendada), lo "opcional/extra" no se aplica salvo pedido explícito, y solo se re-pregunta lo que no tiene propuesta posible (p. ej. falta una ruta). Anotar cada decisión en `PIPELINE.md` › `decisiones:`.
 
 ## Post-aprobación
 1. **Recortes** (si aprobó alguno) → worker A con `MODO=recorte`, `CRUDO=<clip actual>`, `KEEP=<segmentos>`. Re-leer el resumen nuevo: todos los timestamps de acá en adelante salen de él (cero remapeo).

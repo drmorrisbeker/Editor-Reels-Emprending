@@ -61,20 +61,24 @@ de tarea (o la skill) y los parámetros**, nada más:
 
 | Tarea | Prompt del worker | `model` | Modo |
 |---|---|---|---|
-| **A · Transcribir** | "Ejecutá `.claude/skills/reel-yapping/tareas/A-transcribir.md` con NOMBRE=<slug> CRUDO=<ruta> PERFIL=<ruta> MODO=inicial" (o `MODO=recorte KEEP=<segmentos> EXTEND_LAST=<s>`) | `"sonnet"` | foreground (bloquea: lo necesitás para la propuesta) |
+| **A · Transcribir** | "Ejecutá `.claude/skills/reel-yapping/tareas/A-transcribir.md` con NOMBRE=<slug> CRUDO=<ruta> PERFIL=<ruta> MODO=inicial" (o `MODO=recorte KEEP=<segmentos> EXTEND_LAST=<s>`) | `"sonnet"` | **FOREGROUND — `run_in_background: false`, sin excepción.** Bloquea porque todo lo que sigue depende del resumen; si lo lanzás en background y te quedás "esperando", desde afuera parecés trabado y Morris te frena |
 | **B · Escenas** | "Invocá la skill `reel-scenes` con NOMBRE=<slug> PERFIL=<ruta> y este spec: <líneas aprobadas>" | **omitido** (hereda Opus 4.8 de la config global) | `run_in_background: true` |
 | **C · Render** | "Ejecutá `.claude/skills/reel-yapping/tareas/C-render.md` con NOMBRE=<slug> PERFIL=<ruta>" (+ `MODO_PRUEBA=1` si Morris pidió prueba) | `"sonnet"` | `run_in_background: true` |
 
 Forma literal de la llamada:
 
 ```
-Agent(subagent_type: "reel-worker", model: "sonnet", description: "A transcribir <slug>",
+Agent(subagent_type: "reel-worker", model: "sonnet", run_in_background: false, description: "A transcribir <slug>",
       prompt: "Ejecutá .claude/skills/reel-yapping/tareas/A-transcribir.md con NOMBRE=… CRUDO=… PERFIL=… MODO=inicial")
 Agent(subagent_type: "reel-worker", run_in_background: true, description: "B escenas <slug>",
       prompt: "Invocá la skill reel-scenes con NOMBRE=… PERFIL=… y este spec: …")
 ```
 
 Reglas de delegación:
+- **Nunca termines una corrida "esperando" un worker.** Solo se termina una corrida con un bloque
+  de salida (PREGUNTAS / CHECKPOINT / LISTO / ARCHIVADO). Si un worker en background sigue corriendo
+  y no tenés nada más que hacer, seguí esperando su notificación dentro de la misma corrida — no
+  devuelvas un mensaje suelto tipo "espero al worker": Morris lo lee como que te trabaste.
 - **Nunca pases `model: "opus"`**: ese alias resuelve a Opus 5. Para criterio, omití `model`
   (hereda `claude-opus-4-8`); para mecánica, `"sonnet"`.
 - B y C corren en background: **esperá la notificación de finalización** — no la simules, no
@@ -131,8 +135,13 @@ reanuda con su respuesta (con tu historia intacta y tus herramientas, incluida `
 
 - **Un checkpoint por corrida**: el de la fase que bloquea. Todas las preguntas de esa fase van
   juntas en el mismo bloque (por eso música, CTA y nombre de carpeta viajan con la propuesta).
-- **Nunca sigas de largo asumiendo una respuesta.** Si Morris aprueba parcial, aplicás lo aprobado
-  y lo que no contestó lo volvés a preguntar en el siguiente bloque, no lo decidís vos.
+- **Silencio = aprobado tal como lo propusiste** (regla de Morris, 2026-09-08: "lo que no te
+  confirme con cambios, dalo por correcto e implementalo; si no lo respondí es porque está bien").
+  Todo ítem que no contestó se aplica como fue propuesto; por eso cada ítem del checkpoint tiene que
+  llevar UNA propuesta concreta (en ítems con opciones, la primera es la recomendada y es la que se
+  aplica si no elige). Lo rotulado "opcional / extra" NO se aplica salvo pedido explícito. Solo se
+  vuelve a preguntar lo que no tiene propuesta posible (falta un dato: ruta de música, palabra del
+  lead magnet). Nunca inventes una respuesta distinta a lo propuesto.
 - Escribí las propuestas **en el lenguaje de Morris**: qué se ve, qué dice, cuánto dura, por qué.
   Sin jerga (nada de "Sequence", "spring", "ms" sueltos: segundos y descripciones).
 - Antes de emitir el bloque, actualizá `PIPELINE.md` con el estado exacto, así "retomá" funciona.
