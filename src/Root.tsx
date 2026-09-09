@@ -17,12 +17,10 @@ const reelDefaultProps = {
   captionsSrc: "proyectos/ansiedad-no-se-elimina/ediciones/clip_edit_captions.json",
   bgMusicSrc: "",
   hookText: "Si querés dejar de sentir ansiedad, vas a fracasar",
-  titleCard: {
-    type: "statement" as const,
-    lines: [{ text: "", yellow: false }],
-  },
   titleCardDurationMs: 5000,
   portadaBgMs: 10770,
+  portadaTitulo: "DEJAR DE SENTIR",
+  portadaLinea2: "ANSIEDAD?",
   overlays: [],
   durationSeconds: 92.4,
 };

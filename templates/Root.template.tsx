@@ -14,12 +14,10 @@ const reelDefaultProps = {
   captionsSrc: "proyectos/<nombre>/ediciones/clip_edit_captions.json", // ← COMPLETAR
   bgMusicSrc: "", // opcional: ruta a un mp3 en public/ (música muy sutil, vol 0.02)
   hookText: "Gancho de los primeros segundos", // ← COMPLETAR (dolor concreto / pregunta urgente)
-  titleCard: {
-    type: "statement" as const,
-    lines: [{ text: "", yellow: false }],
-  },
   titleCardDurationMs: 5000,
   portadaBgMs: 8000, // ← COMPLETAR (correr el script de base.md "Portada" para elegir un buen frame)
+  portadaTitulo: "", // ← COMPLETAR (título de portada)
+  portadaLinea2: "", // ← COMPLETAR (segunda línea / gancho de portada)
   overlays: [],
   durationSeconds: 60, // ← COMPLETAR (duración del clip editado)
 };

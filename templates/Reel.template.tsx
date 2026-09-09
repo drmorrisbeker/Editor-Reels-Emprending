@@ -70,6 +70,8 @@ export const Reel: React.FC<ReelProps> = ({
   hookText,
   titleCardDurationMs,
   portadaBgMs,
+  portadaTitulo,
+  portadaLinea2,
 }) => {
   const { fps } = useVideoConfig();
   const titleCardFrames = Math.round((titleCardDurationMs / 1000) * fps);
@@ -110,7 +112,7 @@ export const Reel: React.FC<ReelProps> = ({
 
       {/* Portada — frame 0-1 para thumbnail del feed */}
       <Sequence from={0} durationInFrames={2}>
-        <Portada titulo={"TÍTULO"} linea2="GANCHO?" /> {/* ← COMPLETAR (título de portada) */}
+        <Portada titulo={portadaTitulo} linea2={portadaLinea2} />
       </Sequence>
 
       {/* ThumbnailCover — primeros ~2.5 segundos */}

@@ -62,11 +62,13 @@ export const ReelPropsSchema = z.object({
   captionsSrc: z.string(),
   bgMusicSrc: z.string().default(""),
   hookText: z.string(),
-  titleCard: TitleCardSchema,
+  titleCard: TitleCardSchema.optional(),
   titleCardDurationMs: z.number(),
-  overlays: z.array(OverlaySchema),
+  overlays: z.array(OverlaySchema).default([]),
   durationSeconds: z.number(),
   portadaBgMs: z.number().optional(),
+  portadaTitulo: z.string().default("TÍTULO"),
+  portadaLinea2: z.string().default(""),
 });
 
 export type ReelProps = z.infer<typeof ReelPropsSchema>;

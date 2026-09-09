@@ -54,7 +54,6 @@ const GAP_THRESHOLD_MS = 380;
 // Tamaño fijo de subtítulo y ancho máximo de UNA línea. Las páginas se cortan
 // también por ancho: si la próxima palabra no entra en la línea a 74px, arranca
 // una página nueva. Así nunca hay doble línea ni texto achicado.
-const FONT_SIZE = 74;
 const CHAR_W = 46; // ancho aprox por caracter a 74px Poppins 800 (sobreestimado a propósito)
 const WORD_GAP = 14;
 const MAX_LINE_PX = 860;
@@ -90,11 +89,6 @@ function buildPages(words: Word[]): Page[] {
 
   return pages;
 }
-
-// Palabras clave que se enfatizan en cobre de marca (#DFBE9A). Pocas, atadas a
-// los momentos de zoom/click. Sutil — no saturar.
-const EMPHASIS_MS = [4660, 13670, 28140, 59410, 89070];
-const isEmphasis = (w: Word) => EMPHASIS_MS.some((m) => Math.abs(w.fromMs - m) <= 90);
 
 const SubtitlePage: React.FC<{ page: Page }> = ({ page }) => {
   const frame = useCurrentFrame();
@@ -135,7 +129,7 @@ const SubtitlePage: React.FC<{ page: Page }> = ({ page }) => {
               fontSize: 74,
               fontWeight: 800,
               fontFamily: "Poppins, sans-serif",
-              color: isEmphasis(word) ? "#DFBE9A" : "#FFFFFF",
+              color: "#FFFFFF",
               letterSpacing: "-0.01em",
               textShadow:
                 "0 4px 18px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.45)",
