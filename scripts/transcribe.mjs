@@ -1,3 +1,6 @@
+// Transcribe a clip to word-level captions JSON with whisper.cpp.
+// Usage: node scripts/transcribe.mjs <clip.mp4> [--model large-v3|large-v3-turbo|medium]
+// Default model: large-v3 (word-level splitting → real pauses, no timestamp drift).
 import path from "path";
 import { fileURLToPath } from "url";
 import {
@@ -14,8 +17,26 @@ const projectRoot = path.join(__dirname, "..");
 const whisperDir = path.join(projectRoot, "whisper.cpp");
 const publicDir = path.join(projectRoot, "public");
 
+// Parse args: positional video path + optional --model <name> (default large-v3).
+const rawArgs = process.argv.slice(2);
+let model = "large-v3";
+const positionals = [];
+for (let i = 0; i < rawArgs.length; i++) {
+  if (rawArgs[i] === "--model") {
+    model = rawArgs[++i];
+  } else if (rawArgs[i].startsWith("--model=")) {
+    model = rawArgs[i].slice("--model=".length);
+  } else {
+    positionals.push(rawArgs[i]);
+  }
+}
+if (!model) {
+  console.error("Error: --model requires a name (e.g. large-v3, large-v3-turbo, medium)");
+  process.exit(1);
+}
+
 // Accept a full relative path (e.g. public/proyectos/foo/ediciones/clip_edit.mp4) or bare name
-const arg = process.argv[2] ?? "clip";
+const arg = positionals[0] ?? "clip";
 let videoPath, wavPath, captionsPath;
 if (arg.includes("/") || arg.endsWith(".mp4")) {
   // Full path mode
@@ -32,21 +53,28 @@ if (arg.includes("/") || arg.endsWith(".mp4")) {
 console.log(`Transcribing: ${videoPath}`);
 
 await installWhisperCpp({ to: whisperDir, version: "1.5.5" });
-await downloadWhisperModel({ model: "medium", folder: whisperDir });
+await downloadWhisperModel({ model, folder: whisperDir });
 
 console.log("Converting to 16kHz WAV...");
 execSync(`ffmpeg -i "${videoPath}" -ar 16000 -ac 1 "${wavPath}" -y`, {
   stdio: "inherit",
 });
 
-console.log("Transcribing (español)...");
+console.log(`Transcribing (español) con modelo ${model}...`);
 const whisperOutput = await transcribe({
-  model: "medium",
+  model,
   whisperPath: whisperDir,
   whisperCppVersion: "1.5.5",
   inputPath: wavPath,
   tokenLevelTimestamps: true,
   language: "es",
+  // División por palabra (evita el drift de timestamps que sufre `medium` sin split).
+  // OJO: en @remotion/install-whisper-cpp la opción `splitOnWord: true` se traduce a
+  // `--split-on-word true`, pero en whisper.cpp `-sow` es un toggle SIN valor, así que ese
+  // "true" se interpreta como un segundo archivo de entrada → "input file not found 'true'"
+  // y el proceso aborta con exit 1 (las captions nunca se escriben). `-sow` va como flag suelto
+  // vía additionalArgs, que la librería inyecta tal cual sin agregarle valor.
+  additionalArgs: ["--split-on-word"],
 });
 
 const { captions } = toCaptions({ whisperCppOutput: whisperOutput });
