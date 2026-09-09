@@ -31,62 +31,55 @@ Composición: `Plantilla-DrBeker-Reels` | 1080×1920 @ 30fps | h264
 - mergeIntoWords: token sin espacio inicial = continuación de palabra anterior
 - isSentenceBoundary: detecta `.!?…`, `¿¡`, o inicio con mayúscula `/^[A-ZÁÉÍÓÚÜÑ]/`
 - GAP_THRESHOLD_MS=380 | MAX_WORDS_PER_PAGE=3
-- **Tipografía: Poppins ExtraBold (800), blanca `#FFFFFF`**, sin contorno negro grueso — solo sombra suave en capas (`textShadow: "0 4px 18px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.45)"`). fontSize 74, letterSpacing -0.01em. Cargar Poppins en `index.css` (`@import` Google Fonts).
-- **Animación: aparición palabra por palabra.** Cada palabra de la página se revela cuando el Dr. la dice (no toda la página de golpe): `spring` por palabra con `frame: Math.max(0, frame - wordStartFrame)`, config `{ damping: 20, stiffness: 340 }`. Efecto: fade (0→1, sobre `enter [0,0.55]`) + sube (`translateY` 12→0) + micro-escala (0.95→1). Snappy y sutil.
-- **Sincronía con el audio (CRÍTICO):** el spring tarda ~3-4 frames en hacerse visible → la palabra parece llegar con delay. Compensar con `LEAD_MS = 90`: `wordStartFrame = round((word.fromMs - LEAD_MS - page.startMs)/1000*fps)`. La palabra queda visible justo cuando el Dr. la pronuncia.
+- **Tipografía: Inter ExtraBold (800), blanca `#FFFFFF`** (igual en ambas marcas), sin contorno negro grueso — solo sombra suave en capas (`textShadow: "0 4px 18px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.45)"`). fontSize 74, letterSpacing -0.01em. La fuente llega por prop `fontFamily` desde `brand.subtitleFont` (Inter). Cargar Inter en `index.css`.
+- **Animación: renglón junto (modo "page").** El renglón entero aparece de una, SIN animación palabra-por-palabra. Menos ruido visual, más legible en móvil. (El word-by-word con spring y `LEAD_MS` quedó atrás — importado de podcast-clips el 2026-09-08.)
+- **Sin énfasis de color: TODAS las palabras blancas.** No hay `EMPHASIS_MS` ni cobre en los subtítulos — el color de acento vive solo en la portada/gancho.
 - **Cierre de signos (CRÍTICO):** Whisper a veces emite la puntuación de cierre (`?`/`!`/`.`) como token aparte SIN espacio inicial. El filtro de limpieza NO debe descartarla: si es continuación (sin espacio) se mantiene y se fusiona en la palabra previa (`"hago" → "hago?"`). Solo descartar puntuación de cierre **suelta** (con espacio inicial). Los signos de apertura `¿¡` se mantienen siempre (inician palabra). Regla: `if (/^[.,;:!?…]+$/.test(t)) return !c.text.startsWith(" ");`
 - **`paddingBottom: 640`** (NO 460) — el bloque termina en y≈1280, dentro de la zona segura de TikTok/Reels. Con 460 los subtítulos caen en la franja de UI inferior (1350–1920).
-- **Una sola línea SIEMPRE, tamaño fijo 74px (NUNCA achicar ni envolver a 2 líneas).** Solución: **cortar la página por ancho en `buildPages`**, no solo por cantidad de palabras. Estimar ancho de palabra (`text.length * 46px` a 74px Poppins 800, sobreestimado) y si `lineW + WORD_GAP + w > MAX_LINE_PX` (860) → `flush()` (página nueva). Render con `flexWrap:"nowrap"` + `whiteSpace:"nowrap"` (las páginas ya entran por construcción). Si 3 palabras no entran, son 2 páginas — nunca doble línea.
-- **Énfasis sutil de palabras clave en cobre `#DFBE9A`** (NO tipografía distinta — mezclar fuentes ensucia). Pocas palabras (≈6 en todo el video), atadas a los momentos de zoom/click (mismas frases de impacto). `const EMPHASIS_MS = [...]; isEmphasis = w => EMPHASIS_MS.some(m => Math.abs(w.fromMs-m)<=90)`. No saturar: el color + zoom + sonido deben coincidir en la misma palabra.
+- **Una sola línea SIEMPRE, tamaño fijo 74px (NUNCA achicar ni envolver a 2 líneas).** Solución: **cortar la página por ancho en `buildPages`**, no solo por cantidad de palabras. Estimar ancho de palabra (`text.length * 46px` a 74px, sobreestimado) y si `lineW + WORD_GAP + w > MAX_LINE_PX` (860) → `flush()` (página nueva). Render con `flexWrap:"nowrap"` + `whiteSpace:"nowrap"` (las páginas ya entran por construcción). Si 3 palabras no entran, son 2 páginas — nunca doble línea.
 
 **Idea boundaries — capitalizar agresivamente durante revisión de captions:**
 Cuando el Dr. termina una idea y empieza otra (aunque no haya punto ni pausa ≥380ms), capitalizar el primer token de la nueva idea para que `isSentenceBoundary` arranque una nueva página. Esto diferencia conceptos visualmente y facilita la lectura en móvil. Identificar los cambios de idea leyendo la transcripción completa antes de editar los captions.
 
 ## Portada
-- Frames 0-1 (~67ms) — thumbnail IG/TikTok
-- Texto a `top: 45%` (864px) — dentro del safe zone feed (4:5)
-- Línea blanca: Montserrat 900, 100px, uppercase, stroke `2px rgba(0,0,0,0.35)`
-- Línea de gancho: **cobre/accent de marca `#DFBE9A`** (NO amarillo #FFCC00 — no es de la marca), Montserrat 900, 118px, uppercase
-- **Sombreado del párrafo = blur de fondo MUY SUTIL, DETRÁS del texto** (blob oscuro suave, NO una caja cuadrada ni un halo sobre la tipografía). Div hermano con `zIndex:0` + el blob es `position:absolute` → para que quede DETRÁS hay que dar a los divs de texto `position:"relative", zIndex:1` (si no, el absoluto pinta encima). Blob: `inset:"-60px -36px", background:"radial-gradient(closest-side, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.20) 55%, rgba(0,0,0,0) 100%)", filter:"blur(32px)"`. Texto con `textShadow` sutil (`0 3px 16px rgba(0,0,0,0.35)`).
-- Wired en Reel.tsx: `<Sequence from={0} durationInFrames={2}><Portada /></Sequence>`
+Estilo **blur navy abajo**: la cara del locutor queda limpia arriba y el texto va al pie sobre
+un velo navy difuminado que sale del borde inferior. La **identidad la define la marca** (`brand`)
+— tipografía de título, color de gancho y logo cambian por marca. **Detalle en `.claude/rules/plantillas.md`.**
+- Frames 0-1 (~67ms) — thumbnail IG/TikTok. Texto al pie (`bottom: 430`, zona segura), centrado.
+- **Velo SUTIL y TRANSICIONAL** (se sigue viendo la foto): `backdropFilter: blur(18px)` en la mitad inferior + `background` en degradé navy (opacidad máx ~0.62) + `maskImage` largo con alfas intermedios que disuelve el desenfoque hacia arriba en vez de cortar con línea. La legibilidad la sostiene el `textShadow` doble, no la opacidad.
+- Wired: `<Sequence from={0} durationInFrames={2}><Portada ... brand={b} /></Sequence>`
 
-`portadaBgMs` — correr este script y usar el `startMs` resultante en Root.tsx:
-```bash
-node -e "
-const caps = JSON.parse(require('fs').readFileSync('public/proyectos/[nombre]/ediciones/<clip>_captions.json'));
-const END_PUNCT = /[.!?…]/;
-const good = caps.filter(c =>
-  c.confidence > 0.6 &&
-  c.endMs > c.startMs + 100 &&
-  c.startMs > 3000 && c.startMs < 15000 &&
-  !END_PUNCT.test(c.text.trim()) &&
-  c.text.startsWith(' ')
-);
-const pick = good[Math.floor(good.length / 2)];
-console.log('portadaBgMs:', pick.startMs, '|', pick.text.trim(), '@', pick.startMs + 'ms');
-"
-```
+`portadaBgMs` — correr `node scripts/portada_bg_pick.mjs public/proyectos/<nombre>/ediciones/<clip>_captions.json`
+y usar el `startMs` que imprime en Root.tsx.
 
 ## ThumbnailCover
-- hookText: **top 270px** (dentro de la zona segura — top ≥245; arriba de la cabeza del Dr.), Poppins 800, 76px, blanco, spring damping:180, dura `titleCardDurationMs` (default **5000ms** — el gancho necesita tiempo para leerse)
-- **El gancho usa fondo de color de marca que ABRAZA cada línea** (estilo IG stories), NO un rectángulo único alrededor del bloque. Usar un `<span>` (no div) con `box-decoration-break: clone` (+ `WebkitBoxDecorationBreak`): cada línea de texto lleva su propio panel redondeado que se ajusta a su ancho. `fontSize:72, color:"#FFFFFF", backgroundColor:"#0F2135", padding:"10px 28px", borderRadius:22, lineHeight:1.45, boxShadow:"0 10px 34px rgba(0,0,0,0.3)"`. Contenedor padre con `textAlign:"center"`. (La Portada, en cambio, usa blur de fondo, no panel.)
+- hookText: **top 270px** (dentro de la zona segura — top ≥245; arriba de la cabeza del Dr.), Inter 800, 72px, spring damping:180, dura `titleCardDurationMs` (default **5000ms** — el gancho necesita tiempo para leerse). Fuente y colores llegan por prop desde la marca (`fontFamily`, `bgColor`, `fgColor`).
+- **El gancho usa fondo que ABRAZA cada línea** (estilo IG stories), NO un rectángulo único alrededor del bloque. Usar un `<span>` (no div) con `box-decoration-break: clone` (+ `WebkitBoxDecorationBreak`): cada línea lleva su propio panel redondeado. `fontSize:72, padding:"10px 28px", borderRadius:22, lineHeight:1.45, boxShadow:"0 10px 34px rgba(0,0,0,0.3)"`. Colores por marca: **beker** fondo navy `#0F2135` / texto blanco · **clubdeterapia** fondo blanco / texto navy. Contenedor padre con `textAlign:"center"`. (La Portada, en cambio, usa blur de fondo, no panel.)
 - Gradiente: `linear-gradient(to bottom, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0) 100%)` en la franja superior (height 22%)
 
 ## Tipografía
-- **Montserrat**: portada — weight 900, uppercase, letterSpacing -0.02em
-- **Poppins ExtraBold (800)**: subtítulos (74px) y ThumbnailCover/hook (72–76px)
+- **Inter ExtraBold (800)**: subtítulos (74px) y ThumbnailCover/hook (72px) — igual en ambas marcas.
+- **Portada por marca** (ver `plantillas.md`): beker → Inter 900 · clubdeterapia → Geist Black + logo Instrument Serif.
 - **Inter**: scenes — weight 800, lineHeight 1.25
 - `paintOrder: "stroke fill"` con `WebkitTextStroke` solo cuando hay stroke (subtítulos y hook ya NO usan stroke grueso)
+- (Poppins queda cargada en `index.css` por compatibilidad con proyectos viejos; ya no se usa.)
+
+## Marca / plantilla (`brand`)
+Dos marcas (`"beker"` | `"clubdeterapia"`), elegidas al arranque vía prop `brand` en Root.tsx.
+Config en `src/brand.ts`; **detalle de identidad (fuentes, colores, portada, gancho) en
+`.claude/rules/plantillas.md`** — cargarlo solo al elegir marca o tocar identidad. Los subtítulos
+son iguales en ambas. `Reel.tsx`/`Reaction.tsx` hacen `const b = getBrand(brand)` y pasan `b`.
 
 ## Paleta
-Usar la **paleta de marca** (Dr. Morris Beker): navy `#0F2135` · secondary `#4A6382` · **cobre `#A78768`** · **accent-soft `#DFBE9A`** (énfasis de palabras clave en subtítulos) · neutral `#CED5DA` · background `#F7F5F2`.
-Scenes (paleta rehook): fondo `#f5e9d2` · texto `#162a3e` · acento `#b18060`. El amarillo `#FFCC00` quedó deprecado (no es de la marca).
+Paleta por marca → **`.claude/rules/plantillas.md`** (navy `#0F2135` común; acento beker `#DFBE9A`,
+CdT `#A78768`+crema `#FCF0EA`). Scenes (paleta rehook): fondo `#f5e9d2` · texto `#162a3e` · acento
+`#b18060`. El amarillo `#FFCC00` quedó deprecado.
 
 ## Safe zones (medidas del template oficial Jon Loomer, 1080×1920)
 - **Vertical:** top seguro **245px** (arriba: username/follow) · bottom seguro **1534px** (abajo: caption/UI)
 - **Horizontal:** laterales **71–1028px** arriba · desde y≈864 el límite derecho baja a **~887px** (notch de botones like/comentar/compartir de TikTok/Reels)
 - **Subtítulos: `paddingBottom: 640`** (bloque termina en y≈1280, centrado, lejos del notch). Texto importante centrado para no chocar los botones laterales.
-- **Hook/ThumbnailCover: top ≥245** (usar 270). El portada-texto al 45% (864px) entra cómodo.
+- **Hook/ThumbnailCover: top ≥245** (usar 270). La **portada** lleva el texto al pie (`bottom: 430`), dentro de la zona segura inferior.
 
 ## Caption para redes
 Mismo texto para IG y TikTok. Guardar en `public/proyectos/<nombre>/caption.txt`. ~2.200 chars, español rioplatense ("vos/sos/hacés"). Cercano pero profesional. Sin CTAs genéricos.

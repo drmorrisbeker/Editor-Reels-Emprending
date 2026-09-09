@@ -11,6 +11,7 @@ import { Video } from "@remotion/media";
 import { ThumbnailCover } from "./components/ThumbnailCover";
 import { Portada } from "./components/Portada";
 import { Subtitles } from "./components/Subtitles";
+import { getBrand } from "./brand";
 // Escenas / rehook: importar SOLO las que se usen en este video (ver bloque comentado abajo).
 // import { RehookScene } from "./components/RehookScene";
 // import { NumeroConceptoScene } from "./components/scenes/NumeroConceptoScene";
@@ -67,12 +68,14 @@ export const Reel: React.FC<ReelProps> = ({
   videoSrc,
   captionsSrc,
   bgMusicSrc,
+  brand,
   hookText,
   titleCardDurationMs,
   portadaBgMs,
 }) => {
   const { fps } = useVideoConfig();
   const titleCardFrames = Math.round((titleCardDurationMs / 1000) * fps);
+  const b = getBrand(brand);
 
   return (
     <AbsoluteFill style={{ background: "#000" }}>
@@ -110,17 +113,22 @@ export const Reel: React.FC<ReelProps> = ({
 
       {/* Portada — frame 0-1 para thumbnail del feed */}
       <Sequence from={0} durationInFrames={2}>
-        <Portada titulo={"TÍTULO"} linea2="GANCHO?" /> {/* ← COMPLETAR (título de portada) */}
+        <Portada titulo={"TÍTULO"} linea2="GANCHO?" brand={b} /> {/* ← COMPLETAR (título de portada) */}
       </Sequence>
 
       {/* ThumbnailCover — primeros ~2.5 segundos */}
       {hookText && titleCardFrames > 0 && (
         <Sequence durationInFrames={titleCardFrames}>
-          <ThumbnailCover hookText={hookText} />
+          <ThumbnailCover
+            hookText={hookText}
+            bgColor={b.hookBg}
+            fgColor={b.hookFg}
+            fontFamily={b.subtitleFont}
+          />
         </Sequence>
       )}
 
-      <Subtitles captionsSrc={captionsSrc} />
+      <Subtitles captionsSrc={captionsSrc} fontFamily={b.subtitleFont} />
 
       {/* ─────────────────────────────────────────────────────────────────────
           ESCENAS DE CONCEPTO / REHOOK (opcional — van por encima de los subtítulos).

@@ -1,8 +1,15 @@
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 
-export const ThumbnailCover: React.FC<{ hookText: string; bgColor?: string }> = ({
+export const ThumbnailCover: React.FC<{
+  hookText: string;
+  bgColor?: string;
+  fgColor?: string;
+  fontFamily?: string;
+}> = ({
   hookText,
   bgColor = "#0F2135",
+  fgColor = "#FFFFFF",
+  fontFamily = "Inter, sans-serif",
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -42,10 +49,10 @@ export const ThumbnailCover: React.FC<{ hookText: string; bgColor?: string }> = 
             box-decoration-break clone → cada línea lleva su propio panel redondeado. */}
         <span
           style={{
-            fontFamily: "Poppins, sans-serif",
+            fontFamily,
             fontWeight: 800,
             fontSize: 72,
-            color: "#FFFFFF",
+            color: fgColor,
             backgroundColor: bgColor,
             padding: "10px 28px",
             borderRadius: 22,

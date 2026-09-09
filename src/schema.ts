@@ -61,6 +61,9 @@ export const ReelPropsSchema = z.object({
   videoSrc: z.string(),
   captionsSrc: z.string(),
   bgMusicSrc: z.string().default(""),
+  // Marca / plantilla: define tipografía de portada, color de acento, portada y
+  // cartel de gancho. La skill la pregunta al arranque. Ver src/brand.ts.
+  brand: z.enum(["beker", "clubdeterapia"]).default("beker"),
   hookText: z.string(),
   titleCard: TitleCardSchema,
   titleCardDurationMs: z.number(),

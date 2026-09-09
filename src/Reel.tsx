@@ -6,6 +6,7 @@ import { Subtitles } from "./components/Subtitles";
 import { RehookScene } from "./components/RehookScene";
 import { FlujoCausalScene } from "./components/scenes/FlujoCausalScene";
 import { EliminarVsRegularScene } from "./components/scenes/EliminarVsRegularScene";
+import { getBrand } from "./brand";
 import type { ReelProps } from "./schema";
 
 const RAMP_MS = 200;
@@ -63,12 +64,14 @@ export const Reel: React.FC<ReelProps> = ({
   videoSrc,
   captionsSrc,
   bgMusicSrc,
+  brand,
   hookText,
   titleCardDurationMs,
   portadaBgMs,
 }) => {
   const { fps } = useVideoConfig();
   const titleCardFrames = Math.round((titleCardDurationMs / 1000) * fps);
+  const b = getBrand(brand);
 
   return (
     <AbsoluteFill style={{ background: "#000" }}>
@@ -108,17 +111,22 @@ export const Reel: React.FC<ReelProps> = ({
 
       {/* Portada — frame 0-1 para thumbnail del feed */}
       <Sequence from={0} durationInFrames={2}>
-        <Portada titulo={"DEJAR DE SENTIR"} linea2="ANSIEDAD?" />
+        <Portada titulo={"DEJAR DE SENTIR"} linea2="ANSIEDAD?" brand={b} />
       </Sequence>
 
       {/* ThumbnailCover — primeros ~2.5 segundos */}
       {hookText && titleCardFrames > 0 && (
         <Sequence durationInFrames={titleCardFrames}>
-          <ThumbnailCover hookText={hookText} />
+          <ThumbnailCover
+            hookText={hookText}
+            bgColor={b.hookBg}
+            fgColor={b.hookFg}
+            fontFamily={b.subtitleFont}
+          />
         </Sequence>
       )}
 
-      <Subtitles captionsSrc={captionsSrc} />
+      <Subtitles captionsSrc={captionsSrc} fontFamily={b.subtitleFont} />
 
       {/* Escenas y rehook van por encima de los subtítulos (los tapan mientras duran) */}
 

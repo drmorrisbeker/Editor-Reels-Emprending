@@ -9,6 +9,12 @@ Leer en este orden antes de continuar:
 
 Si el mensaje no incluye ruta del video, pedirla antes de continuar. **No pedir el hook text al inicio** — se define después de transcribir.
 
+**Paso 0 — Marca / plantilla (gating obligatorio, preguntar SIEMPRE al arranque):**
+Preguntar **¿Morris Beker o Club de Terapia?** No asumir. El valor va en el prop `brand` de
+Root.tsx (`"beker"` | `"clubdeterapia"`). Cada marca cambia tipografía de portada, acento,
+portada y cartel de gancho; los subtítulos son iguales. **Detalle de cada marca en
+`.claude/rules/plantillas.md`** (leerlo solo acá, al elegir). Config en `src/brand.ts`.
+
 Al recibir la ruta del video:
 1. Arrancar el proyecto con estado limpio: `bash scripts/new_project.sh <nombre>` — crea
    `public/proyectos/<nombre>/{Crudos,ediciones,final}/` y **resetea `src/Reel.tsx` y
@@ -26,28 +32,10 @@ Preguntar también: **¿Querés agregar música de fondo?** Si sí, pedir la rut
 
 Seguir los pasos 1–7 de base.md (cortar silencios → transcribir → revisar captions).
 
-**Detección de frases repetidas (parte del paso 7):** Antes de proponer títulos, correr este script para detectar secuencias de 3 palabras que aparezcan más de una vez. `<clip>` es el nombre del video que se transcribió en el paso 6 (`clip_edit2` si hubo 2da pasada, `clip_edit` si no) — `transcribe.mjs` escribe `<clip>_captions.json` al lado del video:
+**Detección de frases repetidas (parte del paso 7):** Antes de proponer títulos, correr el script para detectar secuencias de 3 palabras que aparezcan más de una vez. `<clip>` es el nombre del video transcripto en el paso 6 (`clip_edit2` si hubo 2da pasada, `clip_edit` si no):
 
 ```bash
-node -e "
-const caps = JSON.parse(require('fs').readFileSync('public/proyectos/<nombre>/ediciones/<clip>_captions.json'));
-const words = [];
-let cur = null;
-caps.forEach(c => {
-  if (c.text.startsWith(' ') || cur === null) {
-    if (cur) words.push(cur);
-    cur = { text: c.text.trim(), startMs: c.startMs };
-  } else { cur.text += c.text; }
-});
-if (cur) words.push(cur);
-const seqMap = {};
-for (let i = 0; i < words.length - 2; i++) {
-  const seq = words[i].text + ' ' + words[i+1].text + ' ' + words[i+2].text;
-  if (!seqMap[seq]) seqMap[seq] = [];
-  seqMap[seq].push((words[i].startMs/1000).toFixed(1) + 's');
-}
-Object.entries(seqMap).filter(([,v]) => v.length > 1).forEach(([seq, times]) => console.log(times.join(' | ') + ' → \"' + seq + '\"'));
-"
+node scripts/detect_repeats.mjs public/proyectos/<nombre>/ediciones/<clip>_captions.json
 ```
 
 Si hay repeticiones, **no eliminar automáticamente** — reportarlas al usuario con los segundos de cada ocurrencia y preguntar cuál conservar. El Dr. puede haberse equivocado al grabar o puede ser repetición retórica intencional.
@@ -95,7 +83,7 @@ Esperar respuesta antes de continuar. El usuario puede aprobar, ajustar, o desca
 
 ### Pasos 8–9 (después de la aprobación)
 
-Configurar Root.tsx y Reel.tsx con los títulos aprobados. Aplicar zoom phrases y concept scenes según yapping.md.
+Configurar Root.tsx y Reel.tsx con los títulos aprobados. **Setear `brand`** en `reelDefaultProps` de Root.tsx con la marca elegida en el Paso 0. Aplicar zoom phrases y concept scenes según yapping.md.
 
 **PHRASE_SOUNDS:** usar clicks sutiles (`sfx/click.mp3`, vol 0.03) para resaltar conceptos clave — los mismos momentos de impacto que los zooms, máx 4–5 por video. No usar en transiciones ni palabras de relleno — solo en los momentos más contundentes.
 

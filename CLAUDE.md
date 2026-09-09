@@ -1,7 +1,15 @@
 # Reels — Plantilla Dr. Beker
 
-Editor de reels verticales (1080×1920) con Remotion. Para procesar un video y armar
-un reel, invocar la skill **`/reel-yapping`** (o simplemente pedir "procesá este video").
+Editor de reels verticales (1080×1920) con Remotion. Dos tipos de reel y **dos marcas**
+(Morris Beker / Club de Terapia, prop `brand`).
 
-La skill lee `.claude/rules/base.md` + `.claude/rules/yapping.md` (fuente de verdad del
-workflow, estilo, paleta y animaciones). Setup e instrucciones de instalación: ver `SETUP.md`.
+**Cómo empezar:**
+- Si no está claro el tipo, usar el agente **`reel-editor`**: pregunta la marca, detecta el
+  tipo (yapping vs reacción) y despacha a la skill correcta.
+- Directo: **`/reel-yapping`** (un locutor a cámara, full-screen con zoom/escenas) o
+  **`/reel-reaction`** (pantalla dividida: video reaccionado + yo reaccionando + mi opinión).
+
+**Reglas (`.claude/rules/`, fuente de verdad):**
+`base.md` (común: subtítulos, portada, gancho, marca, caption) · `yapping.md` (zoom/escenas) ·
+`reaction.md` (split/opinión) · `plantillas.md` (marcas, on-demand) · `scenes.md` (catálogo de
+escenas reutilizables). Config de marcas en código: `src/brand.ts`. Setup: ver `SETUP.md`.

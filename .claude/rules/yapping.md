@@ -98,17 +98,16 @@ Workflow:
 ```
 
 ## Scenes disponibles (referencia)
-`NumeroConceptoScene` | `MitoScene` | `PuertaScene` | `AlgoDistintoScene` | `NeuroplasticidadScene`
-`CambiaScene` | `SacarMedicacionScene` | `CelebrarProgresoScene` | `RumiacionScene`
-`TieneTratatamientoScene` | `LuchaRefuerzaScene` | `ModoHacerSerScene`
-`FlujoCausalScene` | `BarrasEstaticoScene` | `InversionBarrasScene`
+**El catálogo completo con qué muestra / cuándo usar / props de cada escena está en
+`.claude/rules/scenes.md`.** Abrilo cuando busques una escena para reutilizar.
 
 **Eficiencia de contexto (IMPORTANTE):** `src/components/scenes/` es una librería que
 crece con cada video (decenas de scenes, casi todas de temas viejos). **No leer el cuerpo
-de toda la carpeta.** Esta lista de nombres es el catálogo; leé el archivo de UNA scene
-solo si la vas a reutilizar, e importá en Reel.tsx únicamente las scenes que use este
-video. Para crear una scene nueva, seguí el template `MiScene` de más arriba (no hace
-falta abrir las demás).
+de toda la carpeta** ni el catálogo entero de memoria: consultá `scenes.md`, y leé el
+archivo de UNA scene solo si la vas a reutilizar. Importá en Reel.tsx únicamente las scenes
+que use este video. Para crear una scene nueva, seguí el template `MiScene` de más arriba.
+Regenerar el catálogo tras agregar escenas: `node scripts/scenes_catalog.mjs` (lista nombres
++ props; las descripciones se curan a mano).
 
 ## Captions tras 2da pasada de cortes — pitfalls
 

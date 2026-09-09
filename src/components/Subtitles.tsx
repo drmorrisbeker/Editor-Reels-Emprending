@@ -1,11 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   AbsoluteFill,
-  interpolate,
   Sequence,
-  spring,
   staticFile,
-  useCurrentFrame,
   useVideoConfig,
   useDelayRender,
 } from "remotion";
@@ -91,19 +88,10 @@ function buildPages(words: Word[]): Page[] {
   return pages;
 }
 
-// Palabras clave que se enfatizan en cobre de marca (#DFBE9A). Pocas, atadas a
-// los momentos de zoom/click. Sutil — no saturar.
-const EMPHASIS_MS = [4660, 13670, 28140, 59410, 89070];
-const isEmphasis = (w: Word) => EMPHASIS_MS.some((m) => Math.abs(w.fromMs - m) <= 90);
-
-const SubtitlePage: React.FC<{ page: Page }> = ({ page }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-
-  // Lead: el spring tarda ~3-4 frames en hacerse visible. Adelantamos la
-  // aparición ~90ms para que la palabra esté visible justo cuando el Dr. la dice.
-  const LEAD_MS = 90;
-
+// Subtítulos estilo podcast-clips: el renglón entero aparece de una (modo "page"),
+// SIN animación palabra-por-palabra y SIN énfasis de color — todas blancas. Menos
+// ruido visual, más legible en móvil. (El word-by-word y el cobre quedaron atrás.)
+const SubtitlePage: React.FC<{ page: Page; fontFamily: string }> = ({ page, fontFamily }) => {
   // Tamaño fijo + una sola línea garantizada (las páginas ya se cortaron por
   // ancho en buildPages). nowrap evita cualquier envoltura.
   return (
@@ -117,43 +105,31 @@ const SubtitlePage: React.FC<{ page: Page }> = ({ page }) => {
         whiteSpace: "nowrap",
       }}
     >
-      {page.words.map((word, i) => {
-        // Cada palabra se revela cuando el Dr. la dice: aparición palabra por palabra.
-        const wordStartFrame = Math.round(((word.fromMs - LEAD_MS - page.startMs) / 1000) * fps);
-        const enter = spring({
-          frame: Math.max(0, frame - wordStartFrame),
-          fps,
-          config: { damping: 20, stiffness: 340 },
-        });
-        const opacity = interpolate(enter, [0, 0.55], [0, 1], { extrapolateRight: "clamp" });
-        const y = interpolate(enter, [0, 1], [12, 0]);
-        const scale = interpolate(enter, [0, 1], [0.95, 1]);
-        return (
-          <span
-            key={i}
-            style={{
-              fontSize: 74,
-              fontWeight: 800,
-              fontFamily: "Poppins, sans-serif",
-              color: isEmphasis(word) ? "#DFBE9A" : "#FFFFFF",
-              letterSpacing: "-0.01em",
-              textShadow:
-                "0 4px 18px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.45)",
-              opacity,
-              transform: `translateY(${y}px) scale(${scale})`,
-              display: "inline-block",
-              lineHeight: 1.2,
-            }}
-          >
-            {word.text}
-          </span>
-        );
-      })}
+      {page.words.map((word, i) => (
+        <span
+          key={i}
+          style={{
+            fontSize: FONT_SIZE,
+            fontWeight: 800,
+            fontFamily,
+            color: "#FFFFFF",
+            letterSpacing: "-0.01em",
+            textShadow: "0 4px 18px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.45)",
+            display: "inline-block",
+            lineHeight: 1.2,
+          }}
+        >
+          {word.text}
+        </span>
+      ))}
     </div>
   );
 };
 
-export const Subtitles: React.FC<{ captionsSrc: string }> = ({ captionsSrc }) => {
+export const Subtitles: React.FC<{ captionsSrc: string; fontFamily?: string }> = ({
+  captionsSrc,
+  fontFamily = "Inter, sans-serif",
+}) => {
   const [captions, setCaptions] = useState<Caption[] | null>(null);
   const { delayRender, continueRender, cancelRender } = useDelayRender();
   const [handle] = useState(() => delayRender());
@@ -213,7 +189,7 @@ export const Subtitles: React.FC<{ captionsSrc: string }> = ({ captionsSrc }) =>
                 paddingBottom: 640,
               }}
             >
-              <SubtitlePage page={page} />
+              <SubtitlePage page={page} fontFamily={fontFamily} />
             </AbsoluteFill>
           </Sequence>
         );
