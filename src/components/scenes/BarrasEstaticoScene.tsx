@@ -1,3 +1,4 @@
+/** Escena: Título "AHORA" + 2 barras creciendo desde 0 (MEDICACIÓN alta, HERRAMIENTAS baja), estado previo a InversionBarrasScene | Tema: medicación vs herramientas | Reusable: con cambios (labels hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 // First bar appearance: shows current state — MEDICACIÓN tall, HERRAMIENTAS short

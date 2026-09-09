@@ -1,3 +1,4 @@
+/** Escena: marco de puerta que se ilumina, título "UNA PUERTA" y pill "UN CAMINO DIFERENTE", fondo navy. | Tema: proponer un camino de tratamiento distinto | Reusable: con cambios (título y pill hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

@@ -1,3 +1,4 @@
+/** Escena: una píldora grande centrada con el nombre del hábito y subtítulo opcional debajo, color configurable | Tema: genérica | Reusable: sí (habito/subtitulo/color son props) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 export const HabitoScene: React.FC<{ habito: string; subtitulo?: string; color?: string }> = ({

@@ -1,3 +1,4 @@
+/** Escena: número grande + divisor + concepto en 2 líneas sobre blur del video de fondo, entra con spring | Tema: genérica (enumeración de puntos) | Reusable: sí (props numero/linea1/linea2, blur del video de fondo) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const ACCENT = "#DFBE9A"; // accent-soft de marca (reemplaza el #FFCC00 deprecado)

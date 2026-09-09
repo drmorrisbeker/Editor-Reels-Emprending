@@ -1,3 +1,4 @@
+/** Escena: tres píldoras verticales unidas por flechas (A→B→C) que entran en secuencia con spring | Tema: genérica (defaults: malestar→medicación→herramientas) | Reusable: sí (label1-3/sub1-3 son props) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 export const FlujoCausalScene: React.FC<{

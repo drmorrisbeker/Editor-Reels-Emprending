@@ -1,3 +1,4 @@
+/** Escena: título + dos píldoras apiladas que entran con spring, contrastando obsesiones vs compulsiones | Tema: TOC (trastorno obsesivo compulsivo) | Reusable: no (texto y conceptos hardcodeados, sin props) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#f5e9d2";

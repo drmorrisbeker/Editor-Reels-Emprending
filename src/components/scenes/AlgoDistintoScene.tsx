@@ -1,3 +1,4 @@
+/** Escena: Dos palabras grandes centradas entran en cascada con scale-spring, "ALGO" y "DISTINTO" | Tema: genérica (anuncio de cambio de enfoque) | Reusable: con cambios (palabras ALGO/DISTINTO hardcodeadas) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

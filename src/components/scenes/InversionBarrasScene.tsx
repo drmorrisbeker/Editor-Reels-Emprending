@@ -1,3 +1,4 @@
+/** Escena: dos barras que crecen y luego invierten su altura, título cambia de "AHORA" a "EN EL FUTURO" | Tema: medicación vs herramientas, inversión de roles | Reusable: no (labels hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 // Second bar appearance: bars invert — MEDICACIÓN goes down, HERRAMIENTAS goes up

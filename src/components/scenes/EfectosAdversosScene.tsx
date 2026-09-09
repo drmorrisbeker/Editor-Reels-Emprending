@@ -1,3 +1,4 @@
+/** Escena: lista de ítems (ícono+label) que entran uno a uno según timestamps fijos, fondo se atenúa entre ítems | Tema: efectos adversos sexuales de medicación | Reusable: no (textos/delays fijos a un audio) */
 import {
   AbsoluteFill, Audio, interpolate, Sequence,
   spring, staticFile, useCurrentFrame, useVideoConfig,

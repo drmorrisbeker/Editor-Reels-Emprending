@@ -1,3 +1,4 @@
+/** Escena: dos palabras apiladas ("TIENE" "TRATAMIENTO") + pill "lo bueno es esto", entrada en cascada. | Tema: el trastorno tiene tratamiento | Reusable: con cambios (palabras y pill hardcodeadas) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

@@ -1,3 +1,4 @@
+/** Escena: Palabra gigante "CAMBIA" con scale-spring + subtítulo "tu cerebro · tu vida" | Tema: neuroplasticidad / cambio cerebral | Reusable: con cambios (palabra y subtítulo hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

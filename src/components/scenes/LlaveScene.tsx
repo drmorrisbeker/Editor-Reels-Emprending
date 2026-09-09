@@ -1,3 +1,4 @@
+/** Escena: título grande ("LA LLAVE") + subtítulo + píldora inferior, todo entra con spring en cascada | Tema: rol de salvador/complejo de rescate en una relación | Reusable: no (texto fijo, sin props) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

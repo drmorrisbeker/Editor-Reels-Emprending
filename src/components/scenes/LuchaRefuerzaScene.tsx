@@ -1,3 +1,4 @@
+/** Escena: "PELEAR" → "LA REFUERZA" apiladas con flecha y pill final, springs secuenciales | Tema: lucha vs. aceptación emocional | Reusable: con cambios (textos hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG      = "#0B1929";

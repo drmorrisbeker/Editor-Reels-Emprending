@@ -1,92 +1,214 @@
 #!/usr/bin/env python3
 """
-Cuts silence from clip.mp4, adjusts captions, prints new overlay timestamps.
+Corta silencios de un clip y normaliza el audio, imprimiendo la duración final.
 
-Duration target: 60–90s. Use d=2.0 in silencedetect to preserve impactful pauses.
-PAD_SEC adds breathing room on each side of speech segments to avoid word-edge cuts.
+Duración objetivo: 60–90 s. d=2.0 en silencedetect preserva las pausas de impacto.
+PAD_SEC agrega aire a cada lado de los segmentos de habla para no cortar palabras.
+El último segmento recibe un end-pad extra (0.40 s) de silencio de asiento.
+
+Tres modos de segmentación (exactamente uno):
+
+  # 1) El script corre silencedetect él mismo sobre el input y parsea su stderr:
+  python3 scripts/remove_silences.py --input crudo.mp4 --output clip_edit.mp4 \
+      --silencedetect [--noise -35] [--min-silence 2.0] [--extend-last 0.5]
+
+  # 2) Silencios desde un archivo (log de ffmpeg silencedetect, o pares "start end"):
+  python3 scripts/remove_silences.py --input crudo.mp4 --output clip_edit.mp4 \
+      --silences silencios.txt
+
+  # 3) Segmentos a conservar explícitos (segundos) — sin lógica de silencios:
+  python3 scripts/remove_silences.py --input clip_edit.mp4 --output clip_edit2.mp4 \
+      --keep "0-5,10-15.5,20-30"
+
+Flags comunes: --pad 0.15, --end-pad 0.40, --extend-last <s> (extiende el final del
+último segmento conservado, clamp a la duración del input — regla "nunca cortar la
+última palabra"), --dry-run (imprime segmentos + duración + comando ffmpeg, sin crear archivo).
 """
-import json, os, subprocess, sys
+import argparse
+import os
+import re
+import subprocess
+import sys
 
 # Raíz del proyecto = carpeta padre de scripts/ (portable, no hardcodear rutas absolutas)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-INPUT  = "public/proyectos/2026-01-30-yapping/Crudos/input.mp4"
-OUTPUT = "public/proyectos/2026-01-30-yapping/ediciones/clip_edit.mp4"
 
-# 150ms padding on each side of speech segments — avoids cutting mid-word or mid-breath
-PAD_SEC = 0.15
+def probe_duration(path):
+    """Duración del input en segundos vía ffprobe (para clamp de --extend-last)."""
+    r = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+         "-of", "default=noprint_wrappers=1:nokey=1", path],
+        cwd=PROJECT_ROOT, capture_output=True, text=True,
+    )
+    try:
+        return float(r.stdout.strip())
+    except (ValueError, AttributeError):
+        return None
 
-# Detected silences (start, end) in seconds
-# Run: ffmpeg -i INPUT -af "silencedetect=noise=-35dB:d=2.0" -f null - 2>&1 | grep silence
-SILENCE = [
-    (4.260021, 9.247333),    # pausa larga inicio
-    (14.599896, 18.785083),
-    (23.824292, 27.341333),
-    (34.191437, 38.330500),
-    (45.224542, 54.809500),  # pausa larga
-    (61.402062, 67.433500),
-    (76.732229, 86.980200),  # marcador de fin (duración del video)
-]
 
-# Speech segments = gaps between silence periods
-# Each segment is padded by PAD_SEC on both sides, clamped to the silence boundaries.
-speech = []
+def parse_silence_log(text):
+    """Extrae pares (start, end) de un log de ffmpeg silencedetect."""
+    starts = [float(m) for m in re.findall(r"silence_start:\s*([0-9.]+)", text)]
+    ends = [float(m) for m in re.findall(r"silence_end:\s*([0-9.]+)", text)]
+    return list(zip(starts, ends))
 
-# Skip segment before first silence if it starts at 0 (pure silence/noise)
-if SILENCE[0][0] > 0.5:
-    speech.append((0, SILENCE[0][0] + PAD_SEC))
 
-# Segments between silences
-# Last segment gets 400ms end-padding for impact pause instead of PAD_SEC
-for i in range(len(SILENCE) - 1):
-    s = SILENCE[i][1] - PAD_SEC
-    end_pad = 0.40 if i == len(SILENCE) - 2 else PAD_SEC
-    e = SILENCE[i+1][0] + end_pad
-    if e - s > 0.05:
-        speech.append((s, e))
+def run_silencedetect(input_path, noise, min_silence):
+    """Corre ffmpeg silencedetect sobre el input y parsea su stderr (sin shell)."""
+    cmd = [
+        "ffmpeg", "-i", input_path,
+        "-af", f"silencedetect=noise={noise}dB:d={min_silence}",
+        "-f", "null", "-",
+    ]
+    r = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+    # silencedetect escribe en stderr; ffmpeg puede salir 0 con la info igual presente
+    return parse_silence_log(r.stderr)
 
-print("Segments to keep:")
-for i, (s, e) in enumerate(speech):
-    print(f"  {i+1:2d}. {s:7.3f}s – {e:7.3f}s  ({e-s:.2f}s)")
-total = sum(e - s for s, e in speech)
-print(f"  Total: {total:.2f}s  ({total/60:.1f}min)\n")
 
-# ── Build ffmpeg filter_complex ──────────────────────────────────────────────
-n = len(speech)
-parts_v, parts_a, filters = [], [], []
-for i, (s, e) in enumerate(speech):
-    filters.append(f"[0:v]trim={s:.6f}:{e:.6f},setpts=PTS-STARTPTS[v{i}]")
-    filters.append(f"[0:a]atrim={s:.6f}:{e:.6f},asetpts=PTS-STARTPTS[a{i}]")
-    parts_v.append(f"[v{i}]")
-    parts_a.append(f"[a{i}]")
-interleaved = "".join(f"[v{i}][a{i}]" for i in range(n))
-filters.append(interleaved + f"concat=n={n}:v=1:a=1[v][a_raw]")
-filters.append("[a_raw]loudnorm=I=-14:TP=-1.5:LRA=11[a]")
+def load_silences_file(path):
+    """Carga silencios desde archivo: log de silencedetect, o pares 'start end' por línea."""
+    with open(os.path.join(PROJECT_ROOT, path) if not os.path.isabs(path) else path) as f:
+        text = f.read()
+    if "silence_start" in text or "silence_end" in text:
+        return parse_silence_log(text)
+    pairs = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.replace(",", " ").split()
+        if len(parts) >= 2:
+            pairs.append((float(parts[0]), float(parts[1])))
+    return pairs
 
-cmd = [
-    "ffmpeg", "-i", INPUT,
-    "-filter_complex", ";".join(filters),
-    "-map", "[v]", "-map", "[a]",
-    "-c:v", "libx264", "-preset", "fast", "-crf", "20",
-    "-c:a", "aac", "-b:a", "192k",
-    OUTPUT, "-y", "-loglevel", "error",
-]
-print("Running ffmpeg…")
-r = subprocess.run(cmd, cwd=PROJECT_ROOT)
-if r.returncode != 0:
-    sys.exit(1)
-print(f"Created: {OUTPUT}\n")
 
-# ── Helper: map original ms → new ms ────────────────────────────────────────
-def to_new(t_ms):
-    t = t_ms / 1000
-    cum = 0.0
-    for s, e in speech:
-        if t <= s:
-            return cum * 1000
-        if t <= e:
-            return (cum + (t - s)) * 1000
-        cum += (e - s)
-    return cum * 1000
+def silences_to_speech(silence, pad, end_pad):
+    """Convierte silencios (start, end) en segmentos de habla (gaps entre silencios).
 
-print(f"\ndurationSeconds: {round(total)}")
+    Cada segmento se padea PAD_SEC a cada lado. El último gap (antes del último
+    silencio) recibe end_pad en lugar de pad. Lógica idéntica al script original.
+    """
+    speech = []
+    # Segmento antes del primer silencio, si no arranca en 0 (silencio/ruido puro)
+    if silence[0][0] > 0.5:
+        speech.append((0, silence[0][0] + pad))
+    # Segmentos entre silencios; el anteúltimo→último gap lleva end_pad
+    for i in range(len(silence) - 1):
+        s = silence[i][1] - pad
+        this_end_pad = end_pad if i == len(silence) - 2 else pad
+        e = silence[i + 1][0] + this_end_pad
+        if e - s > 0.05:
+            speech.append((s, e))
+    return speech
+
+
+def parse_keep(spec):
+    """Parsea "s-e,s-e,…" a lista de (start, end) en segundos."""
+    segs = []
+    for chunk in spec.split(","):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        a, b = chunk.split("-")
+        segs.append((float(a), float(b)))
+    return segs
+
+
+def main():
+    p = argparse.ArgumentParser(
+        description="Corta silencios / conserva segmentos y normaliza el audio.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p.add_argument("--input", required=True, help="Video de entrada")
+    p.add_argument("--output", required=True, help="Video de salida")
+    mode = p.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--silencedetect", action="store_true",
+                      help="Corre ffmpeg silencedetect sobre el input y parsea su stderr")
+    mode.add_argument("--silences", metavar="FILE",
+                      help="Archivo con log de silencedetect o pares 'start end'")
+    mode.add_argument("--keep", metavar="SPEC",
+                      help='Segmentos a conservar en segundos: "s-e,s-e,…"')
+    p.add_argument("--noise", type=float, default=-35,
+                   help="Umbral silencedetect en dB (default -35)")
+    p.add_argument("--min-silence", type=float, default=2.0,
+                   help="Duración mínima de silencio en s (default 2.0)")
+    p.add_argument("--pad", type=float, default=0.15,
+                   help="Padding a cada lado de los segmentos (default 0.15)")
+    p.add_argument("--end-pad", type=float, default=0.40,
+                   help="Padding extra al final del último segmento (default 0.40)")
+    p.add_argument("--extend-last", type=float, default=0.0,
+                   help="Extiende el final del último segmento conservado (clamp a la duración)")
+    p.add_argument("--dry-run", action="store_true",
+                   help="Imprime segmentos + duración + comando, sin crear el archivo")
+    args = p.parse_args()
+
+    # ── Determinar segmentos a conservar ────────────────────────────────────
+    if args.keep is not None:
+        speech = parse_keep(args.keep)
+    else:
+        if args.silencedetect:
+            silence = run_silencedetect(args.input, args.noise, args.min_silence)
+        else:
+            silence = load_silences_file(args.silences)
+        if not silence:
+            print("No se detectaron silencios.", file=sys.stderr)
+            sys.exit(1)
+        speech = silences_to_speech(silence, args.pad, args.end_pad)
+
+    if not speech:
+        print("No hay segmentos para conservar.", file=sys.stderr)
+        sys.exit(1)
+
+    # ── extend-last: nunca cortar la última palabra ─────────────────────────
+    if args.extend_last > 0:
+        s, e = speech[-1]
+        e += args.extend_last
+        dur = probe_duration(args.input)
+        if dur is not None:
+            e = min(e, dur)
+        speech[-1] = (s, e)
+
+    # ── Reporte de segmentos ────────────────────────────────────────────────
+    print("Segments to keep:")
+    for i, (s, e) in enumerate(speech):
+        print(f"  {i+1:2d}. {s:7.3f}s – {e:7.3f}s  ({e-s:.2f}s)")
+    total = sum(e - s for s, e in speech)
+    print(f"  Total: {total:.2f}s  ({total/60:.1f}min)\n")
+
+    # ── Construir filter_complex ────────────────────────────────────────────
+    n = len(speech)
+    filters = []
+    for i, (s, e) in enumerate(speech):
+        filters.append(f"[0:v]trim={s:.6f}:{e:.6f},setpts=PTS-STARTPTS[v{i}]")
+        filters.append(f"[0:a]atrim={s:.6f}:{e:.6f},asetpts=PTS-STARTPTS[a{i}]")
+    interleaved = "".join(f"[v{i}][a{i}]" for i in range(n))
+    filters.append(interleaved + f"concat=n={n}:v=1:a=1[v][a_raw]")
+    filters.append("[a_raw]loudnorm=I=-14:TP=-1.5:LRA=11[a]")
+
+    cmd = [
+        "ffmpeg", "-i", args.input,
+        "-filter_complex", ";".join(filters),
+        "-map", "[v]", "-map", "[a]",
+        "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+        "-c:a", "aac", "-b:a", "192k",
+        args.output, "-y", "-loglevel", "error",
+    ]
+
+    if args.dry_run:
+        print("ffmpeg command (dry-run, no se crea archivo):")
+        print(" ".join(cmd))
+        print(f"\ndurationSeconds: {round(total)}")
+        return
+
+    print("Running ffmpeg…")
+    r = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    if r.returncode != 0:
+        sys.exit(1)
+    print(f"Created: {args.output}\n")
+
+    print(f"\ndurationSeconds: {round(total)}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,3 +1,4 @@
+/** Escena: dos paneles con barra de intensidad + etiqueta y flecha "NOMBRARLA" al medio, 2do panel con delay | Tema: etiquetar emociones para bajar su intensidad | Reusable: no (export sin props, textos fijos) */
 import {
   AbsoluteFill, Audio, interpolate, Sequence,
   spring, staticFile, useCurrentFrame, useVideoConfig,

@@ -1,3 +1,4 @@
+/** Escena: Split "modo HACER" (resistir·luchar) vs "modo SER" (aceptar·estar), flecha central, springs desde los costados | Tema: ACT/mindfulness | Reusable: con cambios (labels hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

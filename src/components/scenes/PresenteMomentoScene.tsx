@@ -1,3 +1,4 @@
+/** Escena: círculo glow pulsante + 3 palabras en cascada ("ESTAR PLENAMENTE PRESENTE") con subtítulo. | Tema: mindfulness / desconexión de estímulos | Reusable: con cambios (texto hardcodeado) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

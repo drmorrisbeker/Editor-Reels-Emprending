@@ -1,3 +1,4 @@
+/** Escena: dos bloques de texto con flecha entre medio ("RECONOCER lo que sentís" → "MEJOR SALUD MENTAL"), entrada con springs. | Tema: salud mental | Reusable: con cambios (texto hardcodeado) */
 import {
   AbsoluteFill, Audio, interpolate,
   spring, staticFile, useCurrentFrame, useVideoConfig,

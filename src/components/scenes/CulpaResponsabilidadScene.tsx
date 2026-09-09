@@ -1,3 +1,4 @@
+/** Escena: Dos columnas: izquierda dimmed "NO SOS CULPABLE", derecha acento "SÍ SOS RESPONSABLE" | Tema: culpa vs responsabilidad | Reusable: con cambios (frases hardcodeadas) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 export const CulpaResponsabilidadScene: React.FC = () => {

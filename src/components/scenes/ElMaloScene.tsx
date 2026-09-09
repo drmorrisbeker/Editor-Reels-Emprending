@@ -1,3 +1,4 @@
+/** Escena: dos palabras grandes apiladas ("EL" en rojo, "MALO" en blanco) con subtítulo, entran con spring/scale | Tema: "el malo de la película" (rol del síntoma) | Reusable: no (texto fijo, sin props) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG      = "#0B1929";

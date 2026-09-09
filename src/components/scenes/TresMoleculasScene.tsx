@@ -1,3 +1,4 @@
+/** Escena: título "3 MOLÉCULAS" + tres pills apiladas (Serotonina/Noradrenalina/Dopamina) + subtítulo. | Tema: neurotransmisores y motivación | Reusable: con cambios (título y pills hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

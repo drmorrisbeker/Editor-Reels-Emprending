@@ -1,3 +1,4 @@
+/** Escena: placa rehook con fondo crema radial, texto centrado en 2-3 líneas (última en acento) con slide-up + fade. | Tema: genérica | Reusable: sí (linea1/linea2/acento son props) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 export const RehookScene: React.FC<{ linea1: string; linea2?: string; acento?: string }> = ({ linea1, linea2, acento }) => {

@@ -1,3 +1,4 @@
+/** Escena: dos palabras apiladas ("SACAR" "MEDICACIÓN") + pill "el acto más simbólico", entrada en cascada. | Tema: discontinuar la medicación psiquiátrica | Reusable: con cambios (palabras y pill hardcodeadas) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

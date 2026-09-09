@@ -1,3 +1,4 @@
+/** Escena: curva peso-tiempo con ejes SVG, título y trazo animado (bajada o rebote según prop fase) | Tema: Ozempic, efecto rebote al suspender | Reusable: con cambios (labels "OZEMPIC"/"PESO" hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 export const CurvaOzempicScene: React.FC<{ fase: "bajada" | "rebote" }> = ({ fase }) => {

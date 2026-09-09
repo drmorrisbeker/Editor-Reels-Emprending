@@ -1,3 +1,4 @@
+/** Escena: Palabras "CELEBRAR" / "EL PROGRESO" en cascada con scale-spring + pill "momento de felicidad" | Tema: celebrar avances en terapia | Reusable: con cambios (textos hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

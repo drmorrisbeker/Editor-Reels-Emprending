@@ -1,3 +1,4 @@
+/** Escena: Red neuronal SVG animada (nodos+líneas) con título y dos tags entrando debajo | Tema: neuroplasticidad | Reusable: con cambios (título y tags hardcodeados; red es genérica) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

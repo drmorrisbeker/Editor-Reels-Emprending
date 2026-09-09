@@ -1,3 +1,4 @@
+/** Escena: Dos columnas con spring: izquierda "MOTIVAR" dimmed, derecha "ESCUCHAR" acento, divisor central | Tema: cómo acompañar a alguien que sufre | Reusable: con cambios (labels hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#f5e9d2";

@@ -1,3 +1,4 @@
+/** Escena: Flujo vertical MALESTAR → PASTILLA DE REFUERZO → frase final en rojo, cada paso con spring+plop | Tema: medicación y dependencia aprendida | Reusable: con cambios (labels hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 export const MedicacionEnseñaScene: React.FC = () => {

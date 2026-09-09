@@ -1,3 +1,4 @@
+/** Escena: Triángulo OBSESIÓN→COMPULSIÓN→ALIVIO MOMENTÁNEO con anillo giratorio, OBSESIÓN pulsando ("SE REFUERZA") | Tema: círculo vicioso del TOC | Reusable: con cambios (labels hardcodeados) */
 import {
   AbsoluteFill, Audio, interpolate, Sequence,
   spring, staticFile, useCurrentFrame, useVideoConfig,

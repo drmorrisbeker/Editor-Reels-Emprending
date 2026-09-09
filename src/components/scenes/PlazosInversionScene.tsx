@@ -1,3 +1,4 @@
+/** Escena: Mismas barras que PlazosEstaticoScene invirtiéndose, título cambia a "CÍRCULO VICIOSO" | Tema: tolerancia vs. urgencia | Reusable: con cambios (labels hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 // Second bar appearance: bars invert — TOLERANCIA goes down, URGENCIA goes up

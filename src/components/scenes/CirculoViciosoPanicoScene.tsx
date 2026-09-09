@@ -1,3 +1,4 @@
+/** Escena: Diagrama circular de 4 nodos (SENSACIÓN→PENSAMIENTO CATASTRÓFICO→EMOCIONES→MÁS SENSACIONES) con flechas y anillo giratorio | Tema: círculo vicioso del pánico | Reusable: con cambios (labels hardcodeados) */
 import {
   AbsoluteFill, Audio, interpolate, Sequence,
   spring, staticFile, useCurrentFrame, useVideoConfig,

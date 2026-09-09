@@ -1,3 +1,4 @@
+/** Escena: Título + línea de tiempo PASADO/PRESENTE/FUTURO, FUTURO activo con sublabel ANSIEDAD | Tema: ansiedad anticipatoria | Reusable: con cambios (título y labels hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

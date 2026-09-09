@@ -1,3 +1,4 @@
+/** Escena: Dos barras crecen desde 0 (TOLERANCIA alta, URGENCIA baja) bajo título "AL PRINCIPIO" | Tema: tolerancia vs. urgencia | Reusable: con cambios (labels hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 // First bar appearance: shows initial state — TOLERANCIA tall, URGENCIA short

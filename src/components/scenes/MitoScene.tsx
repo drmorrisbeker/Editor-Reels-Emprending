@@ -1,3 +1,4 @@
+/** Escena: Dos frases "mito" en rojo entran una tras otra, subtítulo + tag final "ES UN MITO" | Tema: mitos sobre fracasar/ser débil | Reusable: con cambios (frases hardcodeadas) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG   = "#0B1929";

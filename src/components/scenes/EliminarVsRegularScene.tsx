@@ -1,3 +1,4 @@
+/** Escena: dos columnas contrastadas (izq. atenuada, der. en acento) separadas por "vs", con marca y subtítulo | Tema: eliminar vs regular la ansiedad | Reusable: con cambios (textos hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 // Paleta rehook

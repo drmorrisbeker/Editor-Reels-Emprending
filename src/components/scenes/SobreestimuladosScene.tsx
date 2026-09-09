@@ -1,3 +1,4 @@
+/** Escena: pills de estímulos apareciendo en los bordes + título central "SOBRE ESTIMULADOS". | Tema: sobreestimulación digital | Reusable: con cambios (lista de estímulos y título hardcodeados) */
 import { AbsoluteFill, Audio, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

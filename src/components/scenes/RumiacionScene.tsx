@@ -1,3 +1,4 @@
+/** Escena: dos palabras apiladas ("SOBRE" "PENSAR") + pill "drena tu energía", entrada en cascada. | Tema: rumiación / sobrepensar | Reusable: con cambios (palabras y pill hardcodeadas) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

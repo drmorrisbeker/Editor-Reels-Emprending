@@ -1,3 +1,4 @@
+/** Escena: Lista de 2 ítems (check/cruz) entrando con spring, fondo se atenúa entre apariciones | Tema: mismo efecto sin efecto adverso | Reusable: con cambios (array ITEMS hardcodeado) */
 import {
   AbsoluteFill, Audio, interpolate, Sequence,
   spring, staticFile, useCurrentFrame, useVideoConfig,

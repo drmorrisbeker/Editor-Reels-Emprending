@@ -1,3 +1,4 @@
+/** Escena: Lista vertical de ítems (barra color + label + cita) entrando uno a uno con spring, título fijo | Tema: componentes del mundo interno | Reusable: con cambios (array ITEMS hardcodeado) */
 import {
   AbsoluteFill, Audio, interpolate, Sequence,
   spring, staticFile, useCurrentFrame, useVideoConfig,

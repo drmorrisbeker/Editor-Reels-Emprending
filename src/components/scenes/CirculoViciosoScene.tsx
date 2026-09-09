@@ -1,3 +1,4 @@
+/** Escena: Banner "PASO 1" + círculo PENSAMIENTOS→EMOCIONES→CUERPO ("retroalimenta") + banner "PASO 2" | Tema: círculo pensamiento-emoción-cuerpo | Reusable: no (delays fijos a un transcript) */
 import {
   AbsoluteFill, Audio, interpolate, Sequence,
   spring, staticFile, useCurrentFrame, useVideoConfig,

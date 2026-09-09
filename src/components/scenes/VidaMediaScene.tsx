@@ -1,3 +1,4 @@
+/** Escena: dos palabras apiladas ("VIDA" "MEDIA") + pill "retiro gradual y seguro", entrada en cascada. | Tema: vida media de fármacos / retiro gradual | Reusable: con cambios (palabras y pill hardcodeadas) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";

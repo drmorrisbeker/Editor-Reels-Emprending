@@ -1,3 +1,4 @@
+/** Escena: dos palabras apiladas ("SE" "ENTRENA") + subtítulo "es una habilidad", entrada en cascada. | Tema: regulación emocional entrenable | Reusable: con cambios (texto hardcodeado) */
 import { AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
 const BG     = "#0B1929";
