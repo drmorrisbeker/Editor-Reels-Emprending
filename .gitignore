@@ -26,6 +26,11 @@ public/proyectos/**/*.mp3
 # Scratch temporales de scripts (copias de trabajo por-video)
 scripts/_*_tmp.py
 
+# Inbox de crudos (dropzone): dejar acá las grabaciones nuevas antes de arrancar
+# un proyecto. Los videos NO se versionan; solo el README que explica la carpeta.
+Crudos/*
+!Crudos/README.md
+
 # Docs legacy/stale — contradicen las reglas vivas (base.md + yapping.md son la
 # fuente de verdad). Se mantienen locales pero NO se comparten para evitar
 # instrucciones contradictorias en quien clona.

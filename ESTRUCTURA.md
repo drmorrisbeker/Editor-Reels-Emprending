@@ -41,6 +41,11 @@ al empezar un video. (No hay template de `Reaction.tsx`: es estable.)
 - `reaction_captions_merge.mjs` — une captions react+opinión con offset (solo reacción).
 - `scenes_catalog.mjs` — aid de mantenimiento del catálogo de escenas.
 
+## Inbox de crudos (dropzone)
+`Crudos/` (raíz) — dejá acá las **grabaciones nuevas** antes de arrancar un proyecto. Al
+iniciarlo, el crudo se mueve a `public/proyectos/<nombre>/Crudos/`. Los videos no se versionan
+(gitignore); solo queda su `README.md`. Ver `Crudos/README.md`.
+
 ## Media de trabajo (bajo `public/`, lo que Remotion necesita)
 ```
 public/
@@ -62,6 +67,16 @@ Los .mp4/.png/.mp3 de `proyectos/` están gitignoreados (no se versionan).
 ## Docs / config
 `docs/` (material legacy: CLAUDE-REF, reel-core, REEL-MANUAL, scene-preview) · `SETUP.md`
 (instalación) · `CLAUDE.md` (guía del proyecto) · `README.md` (boilerplate Remotion).
+
+## ¿Dónde van los FINALES? (el reel renderizado)
+1. **Recién renderizado** → `public/proyectos/<nombre>/Final/<nombre>.mp4`
+   (ahí lo escribe `npx remotion render ...`).
+2. **Al cerrar/archivar** el proyecto (`bash scripts/archive_project.sh <nombre>`, con tu
+   confirmación) el reel + `caption.txt` se mueven **fuera de `public/`** a
+   **`Finales/<nombre>/`** (el entregable definitivo), y el material pesado va a `_archivo/`.
+
+Regla simple: **mientras trabajás**, el final está en `public/proyectos/<nombre>/Final/`;
+**cuando cerrás**, queda en `Finales/<nombre>/`.
 
 ## Ciclo de vida de un proyecto
 `new_project.sh` → trabajar en `public/proyectos/<nombre>/` → render a `Final/` →
