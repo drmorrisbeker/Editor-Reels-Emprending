@@ -15,7 +15,7 @@ const reelDefaultProps = {
   bgMusicSrc: "", // opcional: ruta a un mp3 en public/ (música muy sutil, vol 0.02)
   hookText: "Gancho de los primeros segundos", // ← COMPLETAR (dolor concreto / pregunta urgente)
   titleCardDurationMs: 5000,
-  portadaBgMs: 8000, // ← COMPLETAR (correr el script de base.md "Portada" para elegir un buen frame)
+  portadaBgMs: 8000, // ← COMPLETAR (usar el "portadaBgMs candidato" de ediciones/transcript_resumen.md, lo calcula scripts/captions_resumen.mjs)
   portadaTitulo: "", // ← COMPLETAR (título de portada)
   portadaLinea2: "", // ← COMPLETAR (segunda línea / gancho de portada)
   overlays: [],

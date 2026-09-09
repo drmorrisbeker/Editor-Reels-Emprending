@@ -47,14 +47,20 @@ def probe_duration(path):
         return None
 
 
-def parse_silence_log(text):
-    """Extrae pares (start, end) de un log de ffmpeg silencedetect."""
+def parse_silence_log(text, duration=None):
+    """Extrae pares (start, end) de un log de ffmpeg silencedetect.
+
+    Un silencio que llega hasta el final del archivo no emite silence_end: se cierra
+    con la duración del input para que no se pierda ni se conserve como habla.
+    """
     starts = [float(m) for m in re.findall(r"silence_start:\s*([0-9.]+)", text)]
     ends = [float(m) for m in re.findall(r"silence_end:\s*([0-9.]+)", text)]
+    if len(starts) == len(ends) + 1:
+        ends.append(duration if duration is not None else starts[-1])
     return list(zip(starts, ends))
 
 
-def run_silencedetect(input_path, noise, min_silence):
+def run_silencedetect(input_path, noise, min_silence, duration=None):
     """Corre ffmpeg silencedetect sobre el input y parsea su stderr (sin shell)."""
     cmd = [
         "ffmpeg", "-i", input_path,
@@ -63,15 +69,15 @@ def run_silencedetect(input_path, noise, min_silence):
     ]
     r = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
     # silencedetect escribe en stderr; ffmpeg puede salir 0 con la info igual presente
-    return parse_silence_log(r.stderr)
+    return parse_silence_log(r.stderr, duration)
 
 
-def load_silences_file(path):
+def load_silences_file(path, duration=None):
     """Carga silencios desde archivo: log de silencedetect, o pares 'start end' por línea."""
     with open(os.path.join(PROJECT_ROOT, path) if not os.path.isabs(path) else path) as f:
         text = f.read()
     if "silence_start" in text or "silence_end" in text:
-        return parse_silence_log(text)
+        return parse_silence_log(text, duration)
     pairs = []
     for line in text.splitlines():
         line = line.strip()
@@ -83,23 +89,40 @@ def load_silences_file(path):
     return pairs
 
 
-def silences_to_speech(silence, pad, end_pad):
-    """Convierte silencios (start, end) en segmentos de habla (gaps entre silencios).
+def silences_to_speech(silence, pad, end_pad, duration):
+    """Convierte silencios (start, end) en segmentos de habla.
 
-    Cada segmento se padea PAD_SEC a cada lado. El último gap (antes del último
-    silencio) recibe end_pad en lugar de pad. Lógica idéntica al script original.
+    Cada segmento se padea `pad` a cada lado; el último segmento del video recibe
+    `end_pad` (pausa de impacto) en vez de `pad`, clampeado a la duración.
+
+    FIX 2026-09-08: el script original solo generaba tramos ENTRE silencios y daba por
+    hecho que el último silencio era el final del video. Si el video no termina en un
+    silencio ≥ min-silence, todo lo posterior al último silencio se perdía (en un crudo
+    de 39 s con un solo silencio en 5–8 s conservaba 0–5.5 s). Ahora se agrega el
+    tramo final hasta el fin del archivo, y "sin silencios" = archivo entero.
     """
+    if duration is None:
+        raise SystemExit("No pude leer la duración del input con ffprobe; abortando.")
+    if not silence:
+        return [(0.0, min(duration, duration - pad + end_pad))]
     speech = []
     # Segmento antes del primer silencio, si no arranca en 0 (silencio/ruido puro)
     if silence[0][0] > 0.5:
-        speech.append((0, silence[0][0] + pad))
-    # Segmentos entre silencios; el anteúltimo→último gap lleva end_pad
+        speech.append((0.0, silence[0][0] + pad))
+    # Segmentos entre silencios
     for i in range(len(silence) - 1):
         s = silence[i][1] - pad
-        this_end_pad = end_pad if i == len(silence) - 2 else pad
-        e = silence[i + 1][0] + this_end_pad
+        e = silence[i + 1][0] + pad
         if e - s > 0.05:
             speech.append((s, e))
+    # Tramo final: del último silencio al fin del archivo (si queda habla)
+    last_end = silence[-1][1]
+    if duration - last_end > 0.3:
+        speech.append((max(0.0, last_end - pad), duration))
+    # El último tramo lleva end_pad en lugar de pad (pausa de impacto), sin pasarse del fin
+    if speech:
+        s, e = speech[-1]
+        speech[-1] = (s, min(e - pad + end_pad, duration))
     return speech
 
 
@@ -147,14 +170,19 @@ def main():
     if args.keep is not None:
         speech = parse_keep(args.keep)
     else:
+        duration = probe_duration(args.input)
         if args.silencedetect:
-            silence = run_silencedetect(args.input, args.noise, args.min_silence)
+            silence = run_silencedetect(args.input, args.noise, args.min_silence, duration)
         else:
-            silence = load_silences_file(args.silences)
+            silence = load_silences_file(args.silences, duration)
         if not silence:
-            print("No se detectaron silencios.", file=sys.stderr)
-            sys.exit(1)
-        speech = silences_to_speech(silence, args.pad, args.end_pad)
+            print("No se detectaron silencios: se conserva el archivo entero.", file=sys.stderr)
+        else:
+            print(f"Silencios detectados: {len(silence)}")
+            for i, (s, e) in enumerate(silence):
+                print(f"  {i+1:2d}. {s:7.3f}s – {e:7.3f}s  ({e-s:.2f}s)")
+            print()
+        speech = silences_to_speech(silence, args.pad, args.end_pad, duration)
 
     if not speech:
         print("No hay segmentos para conservar.", file=sys.stderr)

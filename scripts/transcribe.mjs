@@ -51,15 +51,25 @@ const whisperOutput = await transcribe({
 
 const { captions } = toCaptions({ whisperCppOutput: whisperOutput });
 
-// Auto-capitalize first token of each Whisper segment → triggers isSentenceBoundary
-for (const segment of whisperOutput.transcription) {
+// Auto-capitalize first token of each Whisper segment → triggers isSentenceBoundary.
+// Guardas (2026-09-08): en clips cortos whisper.cpp emite un segmento por token y esto
+// capitalizaba TODO ("Dig"+"An", "F"+"Í"+"J"+"Ate"). Nunca capitalizar sub-palabras (token sin
+// espacio inicial) y, si el segmento tiene < 3 tokens, solo cuando hay pausa ≥ 380 ms o
+// puntuación de cierre antes (misma lógica de página que Subtitles.tsx).
+const segs = whisperOutput.transcription;
+for (let s = 0; s < segs.length; s++) {
+  const segment = segs[s];
   const idx = captions.findIndex(c => c.startMs >= segment.offsets.from);
-  if (idx >= 0) {
-    captions[idx].text = captions[idx].text.replace(
-      /^(\s*)([a-záéíóúüñ])/i,
-      (_, sp, ch) => sp + ch.toUpperCase()
-    );
-  }
+  if (idx < 0) continue;
+  const tok = captions[idx];
+  if (idx > 0 && !tok.text.startsWith(" ")) continue; // continuación de palabra
+  const nextFrom = segs[s + 1]?.offsets.from ?? Infinity;
+  const nTokens = captions.filter(c => c.startMs >= segment.offsets.from && c.startMs < nextFrom).length;
+  const prev = captions[idx - 1];
+  const gap = prev ? tok.startMs - prev.endMs : Infinity;
+  const afterPunct = prev ? /[.!?…]\s*$/.test(prev.text) : true;
+  if (nTokens < 3 && gap < 380 && !afterPunct) continue;
+  tok.text = tok.text.replace(/^(\s*)([a-záéíóúüñ])/i, (_, sp, ch) => sp + ch.toUpperCase());
 }
 
 fs.writeFileSync(captionsPath, JSON.stringify(captions, null, 2));

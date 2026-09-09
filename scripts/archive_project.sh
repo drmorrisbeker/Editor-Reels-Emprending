@@ -52,9 +52,11 @@ fi
 [ -f "$SRC/caption.txt" ] && mv "$SRC/caption.txt" "$FIN/" && echo "entregable: caption.txt → Finales/$PERFIL/$ANIO/$FECHA-$NAME/"
 
 # decisiones.md = propuesta.md + PIPELINE.md (si existen)
-if [ -f "$SRC/propuesta.md" ] || [ -f "$SRC/PIPELINE.md" ]; then
+# La propuesta vive en ediciones/ (la escribe reel-yapping); se acepta también en la raíz por compatibilidad.
+PROP="$SRC/ediciones/propuesta.md"; [ -f "$PROP" ] || PROP="$SRC/propuesta.md"
+if [ -f "$PROP" ] || [ -f "$SRC/PIPELINE.md" ]; then
   {
-    if [ -f "$SRC/propuesta.md" ]; then echo "# Propuesta"; echo; cat "$SRC/propuesta.md"; echo; fi
+    if [ -f "$PROP" ]; then echo "# Propuesta"; echo; cat "$PROP"; echo; fi
     if [ -f "$SRC/PIPELINE.md" ]; then echo "# Pipeline"; echo; cat "$SRC/PIPELINE.md"; echo; fi
   } > "$FIN/decisiones.md"
   echo "entregable: decisiones.md → Finales/$PERFIL/$ANIO/$FECHA-$NAME/"
