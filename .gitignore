@@ -10,9 +10,12 @@ out
 whisper.cpp
 
 # Material de trabajo / entregables / archivo — no afectan el render de la plantilla
+# (REELS.md NO se ignora: es el índice liviano y se versiona)
 _archivo
 _render_hold
 Finales
+crudos/*
+!crudos/README.md
 
 # Binarios pesados por-video (el diseño NO depende de ellos; se generan por proyecto).
 # Los .json de captions y los .txt de caption SÍ se versionan (formato de ejemplo).
