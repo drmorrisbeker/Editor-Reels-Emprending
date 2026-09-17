@@ -86,7 +86,10 @@ for i, (s, e) in enumerate(speech):
     parts_a.append(f"[a{i}]")
 interleaved = "".join(f"[v{i}][a{i}]" for i in range(n))
 filters.append(interleaved + f"concat=n={n}:v=1:a=1[v][a_raw]")
-filters.append("[a_raw]loudnorm=I=-14:TP=-1.5:LRA=11[a]")
+# Denoise antes de normalizar — si loudnorm calcula sobre audio con ruido de fondo,
+# el gain queda sesgado por ese ruido. Modelo RNNoise entrenado para voz.
+filters.append("[a_raw]arnndn=m=scripts/rnnoise/sh.rnnn[a_dn]")
+filters.append("[a_dn]loudnorm=I=-14:TP=-1.5:LRA=11[a]")
 
 cmd = [
     "ffmpeg", "-i", INPUT,
