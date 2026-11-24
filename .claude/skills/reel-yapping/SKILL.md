@@ -108,3 +108,20 @@ registro, contexto institucional, crédito del orador, CTA, hashtags). Preguntar
 perfil no lo fija**: **¿engagement o lead magnet? Si es lead magnet, ¿qué comentar y qué reciben?**
 
 Luego generar el caption según base.md + el perfil, y guardarlo en `public/proyectos/<nombre>/caption.txt`.
+
+### Paso 12 — Ganchos del video (`ganchos.txt`) (OBLIGATORIO, junto con el caption)
+
+Al lado del video y del `caption.txt`, cada reel lleva `Finales/<nombre>/ganchos.txt`: el título de
+la portada, el gancho título (`hookText`) y lo que se dice en los primeros 3 s. Es para el tablero
+de redes: ahí el título del video es el gancho título (si no hay, la portada), y sirve para analizar
+por qué funcionó un video (¿el gancho escrito o el hablado?). Se genera solo, de Root.tsx/Reel.tsx
++ los subtítulos (con el nombre ya definitivo del paso 10):
+
+```bash
+python3 scripts/ganchos_txt.py <nombre>
+```
+
+Formato `clave: valor`: `titulo_portada`, `gancho_titulo`, `gancho_hablado_3s`, `primera_frase`,
+`titulo_dashboard`. Si imprime `(faltan: …)`, pasar el dato con `--gancho "…"` / `--portada "…"` /
+`--captions <json>`. Correrlo de nuevo pisa el archivo (si cambia el gancho o la portada). Si se
+saltea, `archive_project.sh` lo genera igual antes de archivar.

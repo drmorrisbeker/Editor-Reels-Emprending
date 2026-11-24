@@ -4,6 +4,7 @@
 # Saca el material de trabajo del bundle de Remotion sin perder nada:
 #   1) Crudos/ + Ediciones/  (material de trabajo pesado) → _archivo/<nombre>/
 #   2) caption.txt           → Finales/<nombre>/   (junto al render, que YA se generó ahí)
+#   0) ganchos.txt           → Finales/<nombre>/   (si falta; red de seguridad del paso 12 de reel-yapping)
 # El render final vive en Finales/<nombre>/ desde el paso de render (no en public/).
 # Luego elimina la carpeta public/proyectos/<nombre>/ si quedó vacía.
 # Ambos destinos viven FUERA de public/, así Remotion deja de copiarlos en cada bundle.
@@ -17,6 +18,11 @@ SRC="$VR/public/proyectos/$NAME"
 ARCH="$VR/_archivo/$NAME"
 FIN="$VR/Finales/$NAME"
 mkdir -p "$ARCH" "$FIN"
+
+# 0) ganchos.txt (portada, gancho título, primeros 3 s) — antes de mover Ediciones y resetear src
+if [ ! -f "$FIN/ganchos.txt" ]; then
+  python3 "$VR/scripts/ganchos_txt.py" "$NAME" --out "$FIN" || echo "ojo: a ganchos.txt le falta algún dato (ver arriba)"
+fi
 
 # 1) material de trabajo → _archivo/
 for d in Crudos Ediciones; do
@@ -46,4 +52,4 @@ if [ -n "$(ls -A "$SRC" 2>/dev/null)" ]; then
 fi
 rmdir "$SRC" 2>/dev/null && echo "carpeta public/proyectos/$NAME/ eliminada (vacía)" || true
 
-echo "listo. Crudos/Ediciones en _archivo/$NAME · entregable (mp4 + caption) en Finales/$NAME"
+echo "listo. Crudos/Ediciones en _archivo/$NAME · entregable (mp4 + caption + ganchos) en Finales/$NAME"
