@@ -1,27 +1,19 @@
 # Yapping — Animaciones y Scenes
 
-## Zoom
-RAMP_MS=200ms | 6–8 por video | escala 1.08–1.14 | zoom máximo al cierre
+## Cámara: QUIETA, cortes secos, SIN ZOOM (DEFAULT desde 2026-11-18)
+Morris (18/11), tras ver el estilo reel-kit aplicado: "no me gustan los cortes ni los zooms. Hagamos cortes
+limpios sin zoom". **Default: ningún movimiento de cámara** — ni settles, ni punch-ins, ni pushes, ni zoom
+de apertura (`OPEN.scale = 1`, arrays vacíos en la plantilla). Los jump-cuts van secos. No proponer zoom
+salvo que Morris lo pida para un video puntual. Escenas y rehooks tampoco se usan en las ediciones nuevas
+(Morris, 17/11). Ya se probaron y descartaron: zoom sostenido con rampas (`ZOOM_PHRASES`, 17/11) y la cámara
+de reel-kit con settles en cada corte + punch-ins (18/11).
 
-**Zoom sostenido (CRÍTICO):** El zoom NO es un pulso corto. Entra al inicio de la frase de impacto, **se mantiene en el pico durante toda la frase**, y se aleja recién cuando la frase termina. Definir cada `{ startMs, endMs }` con el `endMs` = timestamp real de fin de la frase de impacto (sacarlo de los captions JSON, no inventar ventanas de ~1s). El `interpolate` `[start, start+RAMP, end-RAMP, end] → [1, scale, scale, 1]` ya sostiene el pico entre `start+RAMP` y `end-RAMP`.
-
-Criterios de selección (leer captions JSON y priorizar):
-- Afirmaciones contundentes o contrasintuitivas ("la medicación NO engorda")
-- Momento en que nombra el tema central del video
-- Giros emocionales ("pero hay algo que nadie te dice")
-- Cierre del video — siempre zoom máximo (1.13–1.14)
-- Evitar: frases de transición, muletillas, palabras sueltas
-
-**Eliminar ZOOM_PHRASES que caigan dentro del rango de timestamps de una concept scene.** La scene cubre el video completo con `opacity` y el zoom de fondo no es visible — es inútil y puede generar artefactos. Revisar después de definir las scenes y sacar los zooms que se superpongan.
-
-```typescript
-const ZOOM_PHRASES = [
-  { startMs: number, endMs: number, scale: number },
-];
-```
+**Cortes limpios:** ningún tramo entre dos cortes dura menos de 0,5 s (`desilence.py --min-seg 0.5`,
+default). Un tramo de 2–13 cuadros se ve como un destello/"foto" que rompe la imagen (Morris, 18/11:
+"frame roto, aparece mi imagen como foto").
 
 ## PHRASE_SOUNDS
-Clicks (`sfx/click.mp3`, **vol 0.03**) solo en los momentos de mayor impacto. **Máx 4–5 por video** — no en cada zoom, solo en los 2–3 más contundentes + cierre. No usar sobre ideas de transición ni muletillas. Menos es más: si hay muchos clicks mientras el Dr. habla, se vuelven ruido.
+Clicks (`sfx/click.mp3`, **vol 0.03**) solo en los momentos de mayor impacto. **Máx 4–5 por video** — en los punch-ins + cierre, nunca en los settles. No usar sobre ideas de transición ni muletillas. Menos es más: si hay muchos clicks mientras el Dr. habla, se vuelven ruido.
 
 ## Rehook scene
 Placa de texto simple que confirma o tensiona el gancho. **No tiene posición fija** — puede aparecer en los primeros segundos o más avanzado el video. Lo que importa es que coincida exactamente con el momento en que el Dr. dice esa frase en el audio.

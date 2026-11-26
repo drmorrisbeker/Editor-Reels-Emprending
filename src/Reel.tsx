@@ -6,7 +6,7 @@
 // marcados con  ← COMPLETAR.  No borrar los mecanismos.
 // Reglas de estilo/animación: .claude/rules/base.md + .claude/rules/yapping.md
 // ─────────────────────────────────────────────────────────────────────────────
-import { AbsoluteFill, Audio, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { Video } from "@remotion/media";
 import { ThumbnailCover } from "./components/ThumbnailCover";
 import { Portada } from "./components/Portada";
@@ -17,46 +17,24 @@ import { getBrand } from "./brand";
 // import { NumeroConceptoScene } from "./components/scenes/NumeroConceptoScene";
 import type { ReelProps } from "./schema";
 
-const RAMP_MS = 200;
-// Zoom sostenido: entra al inicio de la frase de impacto, se mantiene en el pico durante
-// toda la frase, y se aleja recién cuando termina. endMs = fin real de la frase (sacarlo
-// de los captions, no inventar ventanas de ~1s). 6–8 por video, escala 1.08–1.14, máximo
-// al cierre. Ver .claude/rules/yapping.md.
-const ZOOM_PHRASES: { startMs: number; endMs: number; scale: number }[] = [
-  // { startMs: 0, endMs: 0, scale: 1.10 },   // ← COMPLETAR
-];
+// CÁMARA QUIETA: cortes secos, SIN ZOOM (Morris, 18/11: "Hagamos cortes limpios sin zoom").
+// Se probaron y descartaron el zoom sostenido (17/11) y los settles/punch-ins de reel-kit (18/11).
+// Ver .claude/rules/yapping.md.
 
-// Clicks sutiles (sfx/click.mp3, vol 0.03) SOLO en los 4–5 momentos más contundentes
-// (los mismos que los zooms de mayor impacto + cierre). Ver .claude/rules/yapping.md.
+// Clicks sutiles (sfx/click.mp3, vol 0.03) SOLO en los 3–4 momentos más contundentes
+// (frases clave + cierre). Ver .claude/rules/yapping.md.
 const PHRASE_SOUNDS: { ms: number }[] = [
-  // { ms: 0 },   // ← COMPLETAR
+  { ms: 3030 },
+  { ms: 5320 },
+  { ms: 27740 },
 ];
 
-const VideoWithZoom: React.FC<{ src: string }> = ({ src }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const ms = (frame / fps) * 1000;
-
-  const scale = ZOOM_PHRASES.reduce((max, p) => {
-    const s = interpolate(
-      ms,
-      [p.startMs, p.startMs + RAMP_MS, p.endMs - RAMP_MS, p.endMs],
-      [1, p.scale, p.scale, 1],
-      { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-    );
-    return Math.max(max, s);
-  }, 1);
-
+const SpeakerVideo: React.FC<{ src: string }> = ({ src }) => {
   return (
     <Video
       src={staticFile(src)}
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        transform: `scale(${scale})`,
-        transformOrigin: "center center",
-      }}
+      objectFit="cover"
+      style={{ width: "100%", height: "100%" }}
       volume={1.4}
     />
   );
@@ -74,12 +52,13 @@ export const Reel: React.FC<ReelProps> = ({
   portadaBgMs,
 }) => {
   const { fps } = useVideoConfig();
+  const frame = useCurrentFrame();
   const titleCardFrames = Math.round((titleCardDurationMs / 1000) * fps);
   const b = getBrand(brand);
 
   return (
     <AbsoluteFill style={{ background: "#000" }}>
-      <VideoWithZoom src={videoSrc} />
+      <SpeakerVideo src={videoSrc} />
 
       {/* Portada background: frame fijo del video */}
       {portadaBgMs !== undefined && (
@@ -89,7 +68,8 @@ export const Reel: React.FC<ReelProps> = ({
               src={staticFile(videoSrc)}
               trimBefore={Math.round((portadaBgMs / 1000) * fps)}
               volume={0}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              objectFit="cover"
+              style={{ width: "100%", height: "100%" }}
             />
           </AbsoluteFill>
         </Sequence>
@@ -113,7 +93,7 @@ export const Reel: React.FC<ReelProps> = ({
 
       {/* Portada — frame 0-1 para thumbnail del feed */}
       <Sequence from={0} durationInFrames={2}>
-        <Portada titulo={"TÍTULO"} linea2="GANCHO?" brand={b} /> {/* ← COMPLETAR (título de portada) */}
+        <Portada titulo={"¿PSICÓLOGO O"} linea2={"PSIQUIATRA?"} brand={b} />
       </Sequence>
 
       {/* ThumbnailCover — primeros ~2.5 segundos */}
@@ -128,7 +108,12 @@ export const Reel: React.FC<ReelProps> = ({
         </Sequence>
       )}
 
-      <Subtitles captionsSrc={captionsSrc} fontFamily={b.subtitleFont} />
+      {/* Ocultos (opacity, sin desmontar — desmontar reinicia el fetch de captions y
+          cuelga el render) durante los frames 0-1 (tapa de la Portada), para que el
+          thumbnail de feed de IG/TikTok no mezcle el texto de portada con el subtítulo. */}
+      <AbsoluteFill style={{ opacity: frame < 2 ? 0 : 1 }}>
+        <Subtitles captionsSrc={captionsSrc} fontFamily={b.subtitleFont} />
+      </AbsoluteFill>
 
       {/* ─────────────────────────────────────────────────────────────────────
           ESCENAS DE CONCEPTO / REHOOK (opcional — van por encima de los subtítulos).

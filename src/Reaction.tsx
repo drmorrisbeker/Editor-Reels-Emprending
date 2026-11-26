@@ -1,4 +1,4 @@
-import { AbsoluteFill, Audio, Sequence, staticFile, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { Video } from "@remotion/media";
 import { ThumbnailCover } from "./components/ThumbnailCover";
 import { Portada } from "./components/Portada";
@@ -27,6 +27,7 @@ export const Reaction: React.FC<ReactionProps> = ({
   portadaBgMs,
 }) => {
   const { fps } = useVideoConfig();
+  const frame = useCurrentFrame();
   const b = getBrand(brand);
   const splitFrames = Math.round(splitBlockSeconds * fps);
   const titleCardFrames = Math.round((titleCardDurationMs / 1000) * fps);
@@ -98,17 +99,30 @@ export const Reaction: React.FC<ReactionProps> = ({
 
       {/* Portada — frame 0-1 para thumbnail del feed */}
       <Sequence from={0} durationInFrames={2}>
-        <Portada titulo={"TÍTULO"} linea2="GANCHO?" brand={b} />
+        <Portada titulo={"PENSÁS COSAS"} linea2="QUE TE ASUSTAN" brand={b} />
       </Sequence>
 
-      {/* ThumbnailCover — gancho de los primeros segundos */}
+      {/* ThumbnailCover — gancho de los primeros segundos. En reacción el card va sobre la
+          LÍNEA DIVISORIA del split (borde 40%/60%), no en el tercio superior: ahí tapaba la
+          cara de quien reacciona (ver .claude/rules/reaction.md). */}
       {hookText && titleCardFrames > 0 && (
         <Sequence durationInFrames={titleCardFrames}>
-          <ThumbnailCover hookText={hookText} bgColor={b.hookBg} fgColor={b.hookFg} fontFamily={b.subtitleFont} />
+          <ThumbnailCover
+            hookText={hookText}
+            bgColor={b.hookBg}
+            fgColor={b.hookFg}
+            fontFamily={b.subtitleFont}
+            anchorTop={Math.round(TOP_FRAC * 1920) - 58}
+          />
         </Sequence>
       )}
 
-      <Subtitles captionsSrc={captionsSrc} fontFamily={b.subtitleFont} />
+      {/* Ocultos (opacity, sin desmontar — desmontar reinicia el fetch de captions y
+          cuelga el render) durante los frames 0-1 (tapa de la Portada), para que el
+          thumbnail de feed de IG/TikTok no mezcle el texto de portada con el subtítulo. */}
+      <AbsoluteFill style={{ opacity: frame < 2 ? 0 : 1 }}>
+        <Subtitles captionsSrc={captionsSrc} fontFamily={b.subtitleFont} />
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };

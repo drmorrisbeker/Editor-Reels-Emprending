@@ -18,8 +18,10 @@ TPL_REEL="templates/Reel.template.tsx"
 TPL_ROOT="templates/Root.template.tsx"
 [ -f "$TPL_REEL" ] && [ -f "$TPL_ROOT" ] || { echo "faltan las plantillas en templates/"; exit 1; }
 
-# 1) Snapshot si el src actual NO es ya la plantilla en blanco
-if [ -f "$REEL" ] && ! grep -q "PLANTILLA EN BLANCO" "$REEL"; then
+# 1) Snapshot si el src actual NO es idéntico a la plantilla en blanco.
+#    (Antes se buscaba el texto "PLANTILLA EN BLANCO", pero ese encabezado sobrevive cuando se
+#    completa la plantilla → el 2026-11-17 se pisó un Reel/Root ya configurado sin snapshot.)
+if { [ -f "$REEL" ] && ! cmp -s "$REEL" "$TPL_REEL"; } || { [ -f "$ROOT" ] && ! cmp -s "$ROOT" "$TPL_ROOT"; }; then
   # Nombre del proyecto anterior según la línea de videoSrc en Root.tsx; si no, timestamp
   PREV="$(grep 'videoSrc' "$ROOT" 2>/dev/null | grep -oE 'proyectos/[^/"]+' | head -1 | sed 's#proyectos/##')"
   [ -n "${PREV:-}" ] || PREV="sin-archivar-$(date +%Y%m%d-%H%M%S)"

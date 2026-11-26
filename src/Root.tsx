@@ -14,19 +14,19 @@ import { Reaction } from "./Reaction";
 import { ReactionPropsSchema } from "./reactionSchema";
 
 const reelDefaultProps = {
-  videoSrc: "proyectos/<nombre>/Ediciones/clip_edit.mp4", // ← COMPLETAR
-  captionsSrc: "proyectos/<nombre>/Ediciones/clip_edit_captions.json", // ← COMPLETAR
+  videoSrc: "proyectos/psicologo-o-psiquiatra/Ediciones/clip_edit.mp4",
+  captionsSrc: "proyectos/psicologo-o-psiquiatra/Ediciones/clip_edit_captions.json",
   bgMusicSrc: "", // opcional: ruta a un mp3 en public/ (música muy sutil, vol 0.02)
   brand: "beker" as const, // ← COMPLETAR (marca: "beker" | "clubdeterapia" — la skill lo pregunta al arranque)
-  hookText: "Gancho de los primeros segundos", // ← COMPLETAR (dolor concreto / pregunta urgente)
+  hookText: "Psicólogo vs psiquiatra: ¿cuál importa más?",
   titleCard: {
     type: "statement" as const,
     lines: [{ text: "", yellow: false }],
   },
   titleCardDurationMs: 5000,
-  portadaBgMs: 8000, // ← COMPLETAR (correr node scripts/portada_bg_pick.mjs <captions.json>)
+  portadaBgMs: 15200,
   overlays: [],
-  durationSeconds: 60, // ← COMPLETAR (duración del clip editado)
+  durationSeconds: 29.4,
 };
 
 // reel-REACCIÓN — bloques fijos: split (arriba 40% yo / abajo 60% reaccionado) → opinión full-screen.

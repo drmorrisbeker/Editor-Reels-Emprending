@@ -12,6 +12,20 @@ Tres videos crudos → un reel en dos bloques secuenciales:
    video reaccionado bajo (`sourceVolume`, default 0.5) + mi voz reaccionando (1.4).
 2. **Bloque opinión** (resto): **YO a pantalla completa** dando mi opinión. Audio: mi voz.
 
+**Gancho fijo del split (card de texto tipo "Psiquiatra reacciona:"):** si el reel lleva un
+título/card de apertura sobre el bloque split, ubicarlo **en la línea divisoria entre los dos
+videos** (borde entre el 40% de arriba y el 60% de abajo), NO centrado sobre la mitad de arriba
+— ahí tapa la cara de quien reacciona. Encontrado en revisión real (2026-09-15): el gancho
+puesto en el tercio superior tapaba la imagen del Dr. reaccionando.
+
+**Sincronización del bloque split (CRÍTICO):** el tramo de `clip_react` que se usa como
+`reactVideoSrc` debe arrancar **en el mismo instante en que arranca el contenido real de
+`source`** (el video al que se reacciona), no antes. Si el crudo de reacción incluye a la
+persona acomodándose/preparándose antes de empezar a mirar y reaccionar, ese tramo previo hay
+que recortarlo — si no, el bloque split arranca con el Dr. todavía posicionándose mientras el
+audio del video reaccionado ya está sonando, y da la sensación de que no está reaccionando a lo
+que se escucha. Encontrado en revisión real (2026-09-15).
+
 Se subtitula **mi voz** en los dos bloques (captions unidos con offset). La portada usa un
 frame del clip de opinión (cara full-screen).
 

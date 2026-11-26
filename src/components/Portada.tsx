@@ -112,7 +112,7 @@ export const Portada: React.FC<{
         {renderLines(titulo, {
           fontFamily: b.portadaTitleFont,
           fontWeight: 900,
-          fontSize: 92,
+          fontSize: 106,
           color: "#FFFFFF",
           textTransform: "uppercase",
           letterSpacing: "-0.025em",
@@ -125,7 +125,7 @@ export const Portada: React.FC<{
           renderLines(linea2, {
             fontFamily: b.portadaTitleFont,
             fontWeight: 900,
-            fontSize: 100,
+            fontSize: 116,
             color: b.portadaHighlight,
             textTransform: "uppercase",
             letterSpacing: "-0.025em",

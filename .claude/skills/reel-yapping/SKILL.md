@@ -32,6 +32,19 @@ Preguntar también: **¿Querés agregar música de fondo?** Si sí, pedir la rut
 
 Seguir los pasos 1–7 de base.md (cortar silencios → transcribir → revisar captions).
 
+**Corte de silencios = `scripts/desilence.py`, silencios ≥ 0,10 s** (default desde 2026-11-17,
+pedido de Morris). Ya no se usa `silencedetect d=2.0` + `remove_silences.py`. Detalle en el
+paso 3–4 de base.md. **No reutilizar `scripts/_rs_tmp.py`**: es una copia de otro proyecto y,
+si se corre, pisa el `clip_edit.mp4` de ese proyecto.
+
+**Control de tramos cortos (OBLIGATORIO tras cada corte, desde 2026-11-22):** listar los tramos
+del `clip_edit_keep.json` de ≤ 0,6 s y mirar sus cuadros (ffmpeg `tile`). Si no hay habla (Morris
+callado, mirando abajo, agarrando el celular), sacarlo con `--keep-from` + `--exclude`. Un tramo de
+exactamente 0,50 s es casi siempre un golpe/roce estirado por `--min-seg`. El filtro
+`--min-voiced` ya descarta los golpes secos, pero el control a ojo sigue: Morris tuvo que marcar
+dos veces el mismo tipo de frame en `psicologo-o-psiquiatra`. **Si Morris marca un frame roto,
+revisar todos los tramos cortos de todos los videos de la tanda, no solo el que marcó.**
+
 **Detección de frases repetidas (parte del paso 7):** Antes de proponer títulos, correr el script para detectar secuencias de 3 palabras que aparezcan más de una vez. `<clip>` es el nombre del video transcripto en el paso 6 (`clip_edit2` si hubo 2da pasada, `clip_edit` si no):
 
 ```bash
@@ -66,7 +79,6 @@ Proponer 2–3 opciones con una línea de justificación cada una.
 - Nunca antes de los 3s del clip (el ThumbnailCover todavía está activo)
 - Nunca para cerrar el video — el cierre siempre es el Dr. en pantalla
 - **90 frames (3s) por scene** para legibilidad en móvil; N Sequences independientes, no una larga continua
-- Después de definir las scenes, revisar ZOOM_PHRASES y eliminar los que caigan dentro del rango de cualquier scene (la scene cubre el video completo — el zoom de fondo no se ve)
 
 No forzar escenas si el contenido no las necesita. La prioridad es que cada escena aporte algo real: ilustrar algo abstracto, contrastar un mito, enumerar ítems, mostrar un flujo causal.
 
@@ -83,9 +95,11 @@ Esperar respuesta antes de continuar. El usuario puede aprobar, ajustar, o desca
 
 ### Pasos 8–9 (después de la aprobación)
 
-Configurar Root.tsx y Reel.tsx con los títulos aprobados. **Setear `brand`** en `reelDefaultProps` de Root.tsx con la marca elegida en el Paso 0. Aplicar zoom phrases y concept scenes según yapping.md.
+Configurar Root.tsx y Reel.tsx con los títulos aprobados. **Setear `brand`** en `reelDefaultProps` de Root.tsx con la marca elegida en el Paso 0. **Cámara quieta, cortes secos, SIN ZOOM** (default desde 2026-11-18, Morris: "cortes limpios sin
+zoom"; ni zoom sostenido, ni el estilo reel-kit de settles/punches). **Sin escenas ni rehooks** en las
+ediciones nuevas (Morris, 17/11) — saltear las partes 3 y 4 de la propuesta salvo que las pida.
 
-**PHRASE_SOUNDS:** usar clicks sutiles (`sfx/click.mp3`, vol 0.03) para resaltar conceptos clave — los mismos momentos de impacto que los zooms, máx 4–5 por video. No usar en transiciones ni palabras de relleno — solo en los momentos más contundentes.
+**PHRASE_SOUNDS:** usar clicks sutiles (`sfx/click.mp3`, vol 0.03) para resaltar conceptos clave — en las frases clave + cierre, máx 3–4 por video. No usar en transiciones ni palabras de relleno — solo en los momentos más contundentes.
 
 Renderizar.
 

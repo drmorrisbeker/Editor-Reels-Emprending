@@ -174,11 +174,13 @@ export const Subtitles: React.FC<{ captionsSrc: string; fontFamily?: string }> =
       {pages.map((page, i) => {
         const nextPage = pages[i + 1] ?? null;
         const endMs = nextPage ? nextPage.startMs : page.endMs + 400;
+        // Convertir a frames por separado y derivar la duración de la resta de frames
+        // (no de los ms): así cada página TERMINA exactamente en el frame donde arranca
+        // la siguiente y no hay solapamiento de 1 frame por redondeo (dos páginas
+        // encimadas en la transición — bug real encontrado 2026-09-15).
         const startFrame = Math.round((page.startMs / 1000) * fps);
-        const durationInFrames = Math.max(
-          1,
-          Math.round(((endMs - page.startMs) / 1000) * fps),
-        );
+        const endFrame = Math.round((endMs / 1000) * fps);
+        const durationInFrames = Math.max(1, endFrame - startFrame);
 
         return (
           <Sequence key={i} from={startFrame} durationInFrames={durationInFrames}>
@@ -186,7 +188,11 @@ export const Subtitles: React.FC<{ captionsSrc: string; fontFamily?: string }> =
               style={{
                 justifyContent: "flex-end",
                 alignItems: "center",
-                paddingBottom: 640,
+                // 500 (2026-11-18, Morris: "los subtítulos tapan la cara, bajalos por debajo de la
+                // cara"). Renglón ≈ y 1330–1420: debajo del mentón con barba (y ≤ ~1300 en sus
+                // encuadres de casa). Antes 640 → caía sobre boca/mentón. NO bajar a 460: en
+                // 2026-06 Morris marcó que con 460 (fin en y≈1460) se metía en la UI de TikTok/Reels.
+                paddingBottom: 500,
               }}
             >
               <SubtitlePage page={page} fontFamily={fontFamily} />
