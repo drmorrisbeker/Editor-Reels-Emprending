@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // detect_repeats.mjs <captions.json>
-// Detecta secuencias de 3 palabras que aparecen más de una vez (el Dr. puede haber
+// Detecta secuencias de 3 palabras que aparecen más de una vez (la persona puede haber
 // repetido una toma, o ser repetición retórica). Reporta los segundos de cada
 // ocurrencia. NO elimina nada — la decisión es del usuario. Reemplaza el `node -e`
 // inline de la skill reel-yapping (paso 7).

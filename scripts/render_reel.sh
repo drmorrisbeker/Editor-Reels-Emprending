@@ -1,26 +1,25 @@
 #!/usr/bin/env bash
-# render_reel.sh <nombre> [composición]
-# Renderiza Finales/<nombre>/<nombre>.mp4 con un public/ REDUCIDO (symlinks a logos/, sfx/ y solo
-# public/proyectos/<nombre>), en vez de que Remotion copie el public/ entero (15 GB el 18/11 por
-# proyectos sin archivar) en cada bundle. Con RAM justa, el bundle con public/ gigante moría
-# (SIGKILL al "Bundling 59%"). TMPDIR en disco + bt709 (ver memoria reference_remotion_tmpdir).
+# render_reel.sh <nombre> [composición=Reel]
+# Renderiza Terminados/<nombre>/<nombre>.mp4 con un public/ REDUCIDO: sfx/ + solo
+# ediciones/<nombre>. Si Remotion copiara el public/ entero (con todas las Ediciones) en cada
+# bundle, con poca RAM el render muere. TMPDIR en disco (/tmp puede ser RAM) + bt709.
 set -euo pipefail
-NAME="${1:?uso: render_reel.sh <nombre> [composición]}"
-COMP="${2:-Plantilla-DrBeker-Reels}"
+NAME="${1:?uso: render_reel.sh <nombre> [Reel|Reaccion]}"
+COMP="${2:-Reel}"
 VR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$VR"
-[ -d "public/proyectos/$NAME" ] || { echo "no existe public/proyectos/$NAME"; exit 1; }
+[ -d "Ediciones/$NAME" ] || { echo "no existe Ediciones/$NAME"; exit 1; }
 
 PUB="$HOME/.cache/remotion-public/$NAME"
 rm -rf "$PUB"
-mkdir -p "$PUB/proyectos"
+mkdir -p "$PUB/ediciones"
 for e in public/*; do
-  [ "$(basename "$e")" = proyectos ] || ln -s "$VR/$e" "$PUB/"
+  [ "$(basename "$e")" = ediciones ] || ln -s "$VR/$e" "$PUB/"
 done
-ln -s "$VR/public/proyectos/$NAME" "$PUB/proyectos/$NAME"
+ln -s "$VR/Ediciones/$NAME" "$PUB/ediciones/$NAME"
 
-mkdir -p "Finales/$NAME" "$HOME/.cache/remotion-tmp"
-free -h | sed -n 2p
-TMPDIR="$HOME/.cache/remotion-tmp" npx remotion render "$COMP" "Finales/$NAME/$NAME.mp4" \
-  --concurrency=2 --color-space=bt709 --public-dir="$PUB"
+mkdir -p "Terminados/$NAME" "$HOME/.cache/remotion-tmp"
+TMPDIR="$HOME/.cache/remotion-tmp" npx remotion render "$COMP" "Terminados/$NAME/$NAME.mp4" \
+  --concurrency="${CONCURRENCY:-2}" --color-space=bt709 --public-dir="$PUB"
 rm -rf "$PUB"
+echo "listo: Terminados/$NAME/$NAME.mp4"

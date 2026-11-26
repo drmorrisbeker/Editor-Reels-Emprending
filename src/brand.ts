@@ -1,83 +1,71 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Marcas (plantillas) del reel — Morris Beker vs Club de Terapia.
-// Difieren en tipografía de portada, color de acento, portada y cartel de gancho.
-// Los SUBTÍTULOS son iguales en ambas: Inter, renglón junto, todo blanco.
-// La skill pregunta la marca al arranque y setea `brand` en Root.tsx.
+// Marca del reel. Cada marca es una carpeta `marcas/<id>/` con:
+//   marca.json        ← colores, tipografías, logo, tipo de portada (ver marcas/README.md)
+//   logo.png          ← opcional (o el nombre que diga `logoImg`)
+//   fuentes/*.ttf     ← opcional, tipografías propias (`localFonts`)
+//   Portada.tsx       ← opcional, portada propia (`"portada": "propia"`)
+// La plantilla las encuentra sola (require.context, en tiempo de bundle): no hay que
+// registrar nada en el código. El prop `brand` de cada composición es el <id> (nombre de la
+// carpeta). Si la carpeta no existe, se usa DEFAULT_BRAND.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type BrandId = "beker" | "clubdeterapia" | "foropsiquiatria";
+export type PortadaTipo = "default" | "propia" | "ninguna";
 
-export interface Brand {
-  id: BrandId;
-  navy: string; // color base del VELO de la portada (detrás del texto)
-  accent: string; // énfasis de marca
-  subtitleFont: string; // subtítulos + hook — Inter en todas
-  portadaTitleFont: string; // línea principal (blanca) de la portada
-  portadaHighlight: string; // línea de gancho de la portada (color)
-  hookBg: string; // fondo del cartel ThumbnailCover
-  hookFg: string; // texto del cartel ThumbnailCover
-  logoText?: string; // logo de TEXTO horneado en la portada (arriba a la derecha)
-  logoFont?: string; // tipografía del logo de texto
-  logoColor?: string;
-  logoImgSrc?: string; // logo de IMAGEN (staticFile, ej "logos/foropsiquiatria.png") — pisa al de texto
-  logoImgWidth?: number; // ancho del logo-imagen en px (default 200)
-  palette?: Record<string, string>; // paleta institucional completa (referencia; el reel no usa todos)
+export interface LocalFont {
+  family: string; // nombre con el que se usa en fontFamily
+  file: string; // ruta dentro de la carpeta de la marca, ej "fuentes/MiFuente-Black.ttf"
+  weight?: string; // "400", "900", "100 900" (variable)…
+  style?: string; // "normal" | "italic"
 }
 
-export const BRANDS: Record<BrandId, Brand> = {
-  // Dr. Morris Beker — navy + cobre-soft. Portada Montserrat 900.
-  beker: {
-    id: "beker",
-    navy: "#0F2135",
-    accent: "#DFBE9A",
-    subtitleFont: "Inter, sans-serif",
-    portadaTitleFont: "Inter, sans-serif",
-    portadaHighlight: "#DFBE9A",
-    hookBg: "#0F2135",
-    hookFg: "#FFFFFF",
-  },
-  // Club de Terapia — navy + cobre #A78768, portada Geist Black con línea
-  // destacada en crema y logo "club de terapia" en Instrument Serif.
-  clubdeterapia: {
-    id: "clubdeterapia",
-    navy: "#0F2135",
-    accent: "#A78768",
-    subtitleFont: "Inter, sans-serif",
-    portadaTitleFont: "Geist, Inter, sans-serif",
-    portadaHighlight: "#FCF0EA",
-    hookBg: "#FFFFFF",
-    hookFg: "#0F2135",
-    logoText: "club de terapia",
-    logoFont: "'Instrument Serif', serif",
-    logoColor: "#FCF0EA",
-  },
-  // Foropsiquiatría — institucional azul + amarillo. Velo de portada en navy profundo
-  // (#070C53) para contraste; gancho de portada en amarillo institucional; cartel de
-  // gancho en azul institucional. Portada y subtítulos en Inter. Sin logo horneado
-  // por ahora (agregar el wordmark oficial cuando esté).
-  foropsiquiatria: {
-    id: "foropsiquiatria",
-    navy: "#070C53", // velo de portada (profundidad)
-    accent: "#EFA501", // amarillo institucional
-    subtitleFont: "Inter, sans-serif",
-    portadaTitleFont: "Inter, sans-serif",
-    portadaHighlight: "#EFA501",
-    hookBg: "#0A127F", // azul institucional
-    hookFg: "#FFFFFF",
-    logoImgSrc: "logos/foropsiquiatria.png", // sello circular (dejar el PNG en public/logos/)
-    logoImgWidth: 210,
-    palette: {
-      azul: "#0A127F",
-      amarillo: "#EFA501",
-      navy: "#070C53",
-      marfil: "#F7F4EE",
-      mist: "#E7E7F2",
-      softGold: "#FDF2D9",
-      blanco: "#FFFFFF",
-      hover: "#0C1699",
-      press: "#080F66",
-    },
-  },
-};
+/** Lo que se escribe en marcas/<id>/marca.json. Todo es opcional: lo que falta sale del default. */
+export interface BrandFile {
+  nombre?: string;
+  navy?: string; // color del VELO de la portada (detrás del texto)
+  accent?: string; // color de acento de la marca
+  subtitleFont?: string; // subtítulos + cartel de gancho
+  portadaTitleFont?: string; // título de la portada
+  portadaHighlight?: string; // segunda línea (destacada) de la portada
+  hookBg?: string; // fondo del cartel de gancho
+  hookFg?: string; // texto del cartel de gancho
+  logoText?: string; // logo de TEXTO en la portada (arriba a la derecha)
+  logoFont?: string;
+  logoColor?: string;
+  logoImg?: string; // logo de IMAGEN, archivo dentro de la carpeta de la marca (pisa al de texto)
+  logoImgWidth?: number; // ancho del logo en px (default 200)
+  googleFonts?: string[]; // familias de Google Fonts en formato css2, ej "Montserrat:wght@700;900"
+  localFonts?: LocalFont[];
+  portada?: PortadaTipo; // default (la de la plantilla) · propia (marcas/<id>/Portada.tsx) · ninguna
+  palette?: Record<string, string>; // paleta completa, solo referencia
+}
 
-export const getBrand = (id: BrandId): Brand => BRANDS[id] ?? BRANDS.beker;
+/** Marca ya resuelta, lista para los componentes. */
+export interface Brand extends Required<Pick<BrandFile,
+  "nombre" | "navy" | "accent" | "subtitleFont" | "portadaTitleFont" | "portadaHighlight" | "hookBg" | "hookFg" | "portada"
+>> {
+  id: string;
+  logoText?: string;
+  logoFont?: string;
+  logoColor?: string;
+  logoImgUrl?: string; // URL ya resuelta del logo
+  logoImgWidth?: number;
+  googleFonts: string[];
+  localFonts: { family: string; url: string; weight?: string; style?: string }[];
+  palette?: Record<string, string>;
+}
+
+// Marca por defecto: neutra, alto contraste, Inter (ya cargada en index.css).
+export const DEFAULT_BRAND: Brand = {
+  id: "default",
+  nombre: "Por defecto",
+  navy: "#14161C",
+  accent: "#FFC857",
+  subtitleFont: "Inter, sans-serif",
+  portadaTitleFont: "Inter, sans-serif",
+  portadaHighlight: "#FFC857",
+  hookBg: "#FFFFFF",
+  hookFg: "#14161C",
+  portada: "default",
+  googleFonts: [],
+  localFonts: [],
+};

@@ -1,17 +1,16 @@
 import { AbsoluteFill, Img, staticFile } from "remotion";
-import { BRANDS, type Brand, type BrandId } from "../brand";
+import { DEFAULT_BRAND, type Brand } from "../brand";
 
 // Portada — aparece solo en frames 0-1 (~67ms, invisible al viewer).
 // Instagram y TikTok capturan el primer frame como thumbnail del feed.
 //
 // Estilo "blur" (estilo feed de podcast-clips): la cara del protagonista queda
-// limpia arriba y el texto va al pie sobre un velo navy difuminado que sale del
+// limpia arriba y el texto va al pie sobre un velo difuminado que sale del
 // borde inferior. Sutil y transicional — se sigue viendo la foto detrás.
 //
-// La IDENTIDAD la define la marca (`brand`):
-//   · beker        → título Montserrat 900, gancho cobre-soft #DFBE9A.
-//   · clubdeterapia → título Geist Black, gancho crema #FCF0EA, logo
-//                     "club de terapia" (Instrument Serif) arriba a la derecha.
+// La IDENTIDAD la define la marca (`brand`, de marcas/<id>/marca.json): tipografía del
+// título, color de la línea destacada, color del velo y logo (texto o imagen).
+// Es la portada "default". Una marca puede traer la suya en marcas/<id>/Portada.tsx.
 //
 // ZONAS SEGURAS (1080×1920): el bloque de texto termina en y=1490 (arriba de la
 // UI inferior de IG/TikTok) y nada pisa la columna de botones de la derecha.
@@ -36,9 +35,9 @@ export const Portada: React.FC<{
   titulo?: string;
   linea2?: string;
   bgSrc?: string;
-  brand?: BrandId | Brand;
-}> = ({ titulo = "TÍTULO", linea2 = "GANCHO?", bgSrc, brand = "beker" }) => {
-  const b: Brand = typeof brand === "string" ? BRANDS[brand] ?? BRANDS.beker : brand;
+  brand?: Brand;
+}> = ({ titulo = "TÍTULO", linea2 = "GANCHO?", bgSrc, brand = DEFAULT_BRAND }) => {
+  const b = brand;
   const rgb = hexToRgb(b.navy); // color del velo, según la marca
 
   return (
@@ -46,9 +45,9 @@ export const Portada: React.FC<{
       {bgSrc && <Img src={staticFile(bgSrc)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
 
       {/* Logo de marca horneado — arriba a la derecha. Imagen (sello) pisa al texto. */}
-      {b.logoImgSrc ? (
+      {b.logoImgUrl ? (
         <Img
-          src={staticFile(b.logoImgSrc)}
+          src={b.logoImgUrl}
           style={{
             position: "absolute",
             top: 60,

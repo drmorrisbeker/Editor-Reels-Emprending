@@ -8,8 +8,8 @@ import { z } from "zod";
 // Audio: en el split se escucha el video reaccionado (bajo, `sourceVolume`) + mi voz;
 // en la opinión, solo mi voz. Se subtitula mi voz (captions ya unidos con offset).
 export const ReactionPropsSchema = z.object({
-  // Marca / plantilla (ver src/brand.ts y .claude/rules/plantillas.md).
-  brand: z.enum(["beker", "clubdeterapia", "foropsiquiatria"]).default("beker"),
+  // Marca: <id> = carpeta en marcas/ (si no existe, marca por defecto). Ver marcas/README.md.
+  brand: z.string().default("default"),
 
   // Bloque split
   reactVideoSrc: z.string(), // YO reaccionando (arriba, 40%) — ya sin silencios
@@ -23,8 +23,10 @@ export const ReactionPropsSchema = z.object({
   // Comunes (igual que reel-yapping)
   captionsSrc: z.string(), // captions unidos (react + opinión con offset)
   bgMusicSrc: z.string().default(""),
+  portadaTitulo: z.string().default(""), // portada (frames 0-1). "\n" = salto de línea
+  portadaLinea2: z.string().default(""), // segunda línea, en el color destacado de la marca
   hookText: z.string(),
-  titleCardDurationMs: z.number(),
+  titleCardDurationMs: z.number().default(5000),
   portadaBgMs: z.number().optional(), // frame del clip de opinión para el fondo de portada
   durationSeconds: z.number(), // splitBlockSeconds + duración del clip de opinión
 });

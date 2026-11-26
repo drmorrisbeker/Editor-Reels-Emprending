@@ -1,44 +1,32 @@
 #!/usr/bin/env bash
-# new_project.sh <nombre>
+# new_project.sh <nombre> [marca]
 # Arranca un video NUEVO con estado limpio:
-#   1) Snapshot no destructivo del src/Reel.tsx + src/Root.tsx actuales (si no están ya
-#      en blanco), para no perder el estado del video anterior si no se archivó.
-#   2) Resetea src/Reel.tsx y src/Root.tsx a la plantilla en blanco (templates/).
-#   3) Crea public/proyectos/<nombre>/{Crudos,Ediciones}/ (media de trabajo) y
-#      Finales/<nombre>/ (donde se renderiza el entregable, fuera de public/).
-# Así cada video empieza sin arrastrar zoom/sonidos/escenas/portada del anterior.
+#   1) prepara las carpetas (preparar.sh)
+#   2) guarda el src/Root.tsx del video anterior en Ediciones/<anterior>/src/ (si no está en blanco)
+#   3) resetea src/Root.tsx a la plantilla y le pone el proyecto y la marca
+#   4) crea Crudos/<nombre>/, Ediciones/<nombre>/ y Terminados/<nombre>/
 set -euo pipefail
-NAME="${1:?uso: new_project.sh <nombre>}"
+NAME="${1:?uso: new_project.sh <nombre> [marca]}"
+MARCA="${2:-default}"
 VR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$VR"
+bash scripts/preparar.sh >/dev/null
 
-REEL="src/Reel.tsx"
-ROOT="src/Root.tsx"
-TPL_REEL="templates/Reel.template.tsx"
-TPL_ROOT="templates/Root.template.tsx"
-[ -f "$TPL_REEL" ] && [ -f "$TPL_ROOT" ] || { echo "faltan las plantillas en templates/"; exit 1; }
-
-# 1) Snapshot si el src actual NO es idéntico a la plantilla en blanco.
-#    (Antes se buscaba el texto "PLANTILLA EN BLANCO", pero ese encabezado sobrevive cuando se
-#    completa la plantilla → el 2026-11-17 se pisó un Reel/Root ya configurado sin snapshot.)
-if { [ -f "$REEL" ] && ! cmp -s "$REEL" "$TPL_REEL"; } || { [ -f "$ROOT" ] && ! cmp -s "$ROOT" "$TPL_ROOT"; }; then
-  # Nombre del proyecto anterior según la línea de videoSrc en Root.tsx; si no, timestamp
-  PREV="$(grep 'videoSrc' "$ROOT" 2>/dev/null | grep -oE 'proyectos/[^/"]+' | head -1 | sed 's#proyectos/##')"
-  [ -n "${PREV:-}" ] || PREV="sin-archivar-$(date +%Y%m%d-%H%M%S)"
-  SNAP="_archivo/$PREV/src"
-  mkdir -p "$SNAP"
-  cp "$REEL" "$ROOT" "$SNAP/" 2>/dev/null || true
-  echo "snapshot del src anterior → $SNAP/  (proyecto: $PREV)"
+ROOT="src/Root.tsx"; TPL="templates/Root.template.tsx"
+if [ -f "$ROOT" ] && ! cmp -s "$ROOT" "$TPL"; then
+  PREV="$(grep -oE '^const PROYECTO = "[^"]+"' "$ROOT" | sed -E 's/.*"(.*)"/\1/' || true)"
+  [ -n "${PREV:-}" ] && [ "$PREV" != "<nombre>" ] || PREV="_sin-nombre-$(date +%Y%m%d-%H%M%S)"
+  mkdir -p "Ediciones/$PREV/src"
+  cp "$ROOT" "Ediciones/$PREV/src/Root.tsx"
+  echo "guardado el Root del video anterior → Ediciones/$PREV/src/Root.tsx"
 fi
 
-# 2) Reset a la plantilla en blanco
-cp "$TPL_REEL" "$REEL"
-cp "$TPL_ROOT" "$ROOT"
-echo "src/Reel.tsx y src/Root.tsx reseteados a la plantilla en blanco"
+if [ "$MARCA" != "default" ] && [ ! -f "marcas/$MARCA/marca.json" ]; then
+  echo "ojo: no existe marcas/$MARCA/marca.json — se usa la marca por defecto hasta crearla"
+fi
+sed -e "s|^const MARCA = \"default\";|const MARCA = \"$MARCA\";|" \
+    -e "s|^const PROYECTO = \"<nombre>\";|const PROYECTO = \"$NAME\";|" "$TPL" > "$ROOT"
 
-# 3) Estructura del proyecto nuevo: media de trabajo en public/, entregable en Finales/
-mkdir -p "public/proyectos/$NAME"/{Crudos,Ediciones}
-mkdir -p "Finales/$NAME"
-echo "creado public/proyectos/$NAME/{Crudos,Ediciones} + Finales/$NAME/"
-echo "listo. Mové el crudo a public/proyectos/$NAME/Crudos/ y seguí el workflow (base.md)."
-echo "El render final va a Finales/$NAME/$NAME.mp4"
+mkdir -p "Crudos/$NAME" "Ediciones/$NAME" "Terminados/$NAME"
+echo "listo: Crudos/$NAME · Ediciones/$NAME · Terminados/$NAME · marca: $MARCA"
+echo "Mové el crudo a Crudos/$NAME/ y seguí el flujo (.claude/rules/base.md)."

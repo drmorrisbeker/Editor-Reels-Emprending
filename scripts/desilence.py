@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Corte de silencios de reel-yapping (DEFAULT desde 2026-11-17, pedido de Morris:
+Corte de silencios de reel-yapping (DEFAULT desde 2026-11-17:
 "el corte se hace con silencios mayores a 0.10 seg").
 
 Toda pausa con ≥ 0,10 s de silencio real se recorta, dejando 0,04 s de aire a cada lado
@@ -184,15 +184,15 @@ def main():
     # Tramos que son solo ruido (2026-11-18): con el umbral auto (~-60 dB) un roce de mano, tocar el
     # mic o el gesto de pausar la grabación (pico ~-59 dB) cuenta como "habla", y después --min-seg
     # lo estira a 0,5 s → pausa muerta con la mano en cuadro + "fritura" que loudnorm amplifica
-    # (Morris, 18/11). La voz pica a -22/-35 dB. Si el pico de la envolvente del tramo no llega a
+    # (18/11). La voz pica a -22/-35 dB. Si el pico de la envolvente del tramo no llega a
     # --min-voice, el tramo se descarta (salvo que contenga una palabra de --words). En los bordes,
     # el vecino recupera el aire de --lead/--tail dentro del silencio que los separaba.
     def peak(s, e):
         w = db[int(s / WIN):max(int(s / WIN) + 1, int(e / WIN))]
         return max(w) if w else -120.0
     # Golpes secos (2026-11-22): tocar/agarrar el celular pica a -43 dB (pasa --min-voice) pero
-    # dura 10 ms; --min-seg lo estiraba a 0,5 s de Morris callado acercándose a la cámara
-    # (psicologo-o-psiquiatra, ~0:06). El habla más corta medida pasa 0,38 s por encima de -45 dB.
+    # dura 10 ms; --min-seg lo estiraba a 0,5 s de la persona callada acercándose a la cámara
+    # (caso real, ~0:06). El habla más corta medida pasa 0,38 s por encima de -45 dB.
     def voiced(s, e):
         return sum(v > -45.0 for v in db[int(s / WIN):int(e / WIN)]) * WIN
     def has_word(s, e):
@@ -228,7 +228,7 @@ def main():
         keep = [[s, e] for s, e in nk if e - s >= 2 / fps]
 
     # Tramo mínimo (2026-11-18): un tramo de pocos cuadros entre dos cortes se ve como un destello /
-    # "foto" que rompe la imagen (Morris: "frame roto… aparece mi imagen como foto"). Cada tramo más
+    # "foto" que rompe la imagen ("frame roto… aparece mi imagen como foto"). Cada tramo más
     # corto que --min-seg se alarga hacia el silencio que lo rodea (primero hacia adelante, después
     # hacia atrás), nunca dentro de un --exclude. Si se come todo el silencio, se une al vecino.
     excl = [tuple(snap(float(v)) for v in r.split("-")) for r in filter(None, args.exclude.split(","))]

@@ -1,0 +1,15 @@
+{
+  "nombre": "Marca de ejemplo",
+  "navy": "#1B1F3B",
+  "accent": "#FF7A59",
+  "subtitleFont": "Inter, sans-serif",
+  "portadaTitleFont": "Montserrat, Inter, sans-serif",
+  "portadaHighlight": "#FF7A59",
+  "hookBg": "#FFFFFF",
+  "hookFg": "#1B1F3B",
+  "logoText": "tu marca",
+  "logoFont": "Montserrat, sans-serif",
+  "logoColor": "#FFFFFF",
+  "googleFonts": ["Montserrat:wght@700;800;900"],
+  "portada": "default"
+}

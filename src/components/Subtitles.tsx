@@ -188,10 +188,10 @@ export const Subtitles: React.FC<{ captionsSrc: string; fontFamily?: string }> =
               style={{
                 justifyContent: "flex-end",
                 alignItems: "center",
-                // 500 (2026-11-18, Morris: "los subtítulos tapan la cara, bajalos por debajo de la
+                // 500 (2026-11-18: "los subtítulos tapan la cara, bajalos por debajo de la
                 // cara"). Renglón ≈ y 1330–1420: debajo del mentón con barba (y ≤ ~1300 en sus
                 // encuadres de casa). Antes 640 → caía sobre boca/mentón. NO bajar a 460: en
-                // 2026-06 Morris marcó que con 460 (fin en y≈1460) se metía en la UI de TikTok/Reels.
+                // en 2026-06 se vio que con 460 (fin en y≈1460) se metía en la UI de TikTok/Reels.
                 paddingBottom: 500,
               }}
             >

@@ -1,15 +1,16 @@
 import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { Video } from "@remotion/media";
 import { ThumbnailCover } from "./components/ThumbnailCover";
-import { Portada } from "./components/Portada";
+import { PortadaMarca, usaPortada } from "./components/PortadaMarca";
 import { Subtitles } from "./components/Subtitles";
-import { getBrand } from "./brand";
+import { getBrand } from "./marcas";
+import { useBrandFonts } from "./fonts";
 import type { ReactionProps } from "./reactionSchema";
 
 // Reel-REACCIÓN — estructura de bloques fijos (ver .claude/rules/reaction.md):
 //   Bloque split  (0 .. splitBlockSeconds): arriba 40% YO, abajo 60% el video reaccionado.
 //   Bloque opinión (resto): YO a pantalla completa.
-// Reusa Portada / ThumbnailCover / Subtitles / brand de reel-yapping.
+// Reusa portada / cartel de gancho / subtítulos / marca de reel-yapping. No se edita por video.
 
 const TOP_FRAC = 0.4; // mi parte arriba = 40% (prioridad al video reaccionado, 60% abajo)
 
@@ -22,6 +23,8 @@ export const Reaction: React.FC<ReactionProps> = ({
   opinionVideoSrc,
   captionsSrc,
   bgMusicSrc,
+  portadaTitulo,
+  portadaLinea2,
   hookText,
   titleCardDurationMs,
   portadaBgMs,
@@ -29,6 +32,8 @@ export const Reaction: React.FC<ReactionProps> = ({
   const { fps } = useVideoConfig();
   const frame = useCurrentFrame();
   const b = getBrand(brand);
+  useBrandFonts(b);
+  const conPortada = usaPortada(b) && Boolean(portadaTitulo || portadaLinea2);
   const splitFrames = Math.round(splitBlockSeconds * fps);
   const titleCardFrames = Math.round((titleCardDurationMs / 1000) * fps);
 
@@ -66,15 +71,15 @@ export const Reaction: React.FC<ReactionProps> = ({
           <Video
             src={staticFile(opinionVideoSrc)}
             objectFit="cover"
-              style={{ width: "100%", height: "100%" }}
+            style={{ width: "100%", height: "100%" }}
             volume={1.4}
           />
         </AbsoluteFill>
       </Sequence>
 
       {/* Portada background: frame fijo del clip de opinión (cara full-screen) */}
-      {portadaBgMs !== undefined && (
-        <Sequence from={0} durationInFrames={2}>
+      {conPortada && portadaBgMs !== undefined && (
+        <Sequence durationInFrames={2}>
           <AbsoluteFill>
             <Video
               src={staticFile(opinionVideoSrc)}
@@ -98,9 +103,11 @@ export const Reaction: React.FC<ReactionProps> = ({
       />
 
       {/* Portada — frame 0-1 para thumbnail del feed */}
-      <Sequence from={0} durationInFrames={2}>
-        <Portada titulo={"PENSÁS COSAS"} linea2="QUE TE ASUSTAN" brand={b} />
-      </Sequence>
+      {conPortada && (
+        <Sequence durationInFrames={2}>
+          <PortadaMarca titulo={portadaTitulo} linea2={portadaLinea2} brand={b} />
+        </Sequence>
+      )}
 
       {/* ThumbnailCover — gancho de los primeros segundos. En reacción el card va sobre la
           LÍNEA DIVISORIA del split (borde 40%/60%), no en el tercio superior: ahí tapaba la
@@ -120,7 +127,7 @@ export const Reaction: React.FC<ReactionProps> = ({
       {/* Ocultos (opacity, sin desmontar — desmontar reinicia el fetch de captions y
           cuelga el render) durante los frames 0-1 (tapa de la Portada), para que el
           thumbnail de feed de IG/TikTok no mezcle el texto de portada con el subtítulo. */}
-      <AbsoluteFill style={{ opacity: frame < 2 ? 0 : 1 }}>
+      <AbsoluteFill style={{ opacity: conPortada && frame < 2 ? 0 : 1 }}>
         <Subtitles captionsSrc={captionsSrc} fontFamily={b.subtitleFont} />
       </AbsoluteFill>
     </AbsoluteFill>

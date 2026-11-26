@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ganchos.txt de un reel (reel-yapping) — los ganchos del video, para el tablero de redes.
 
-Escribe `Finales/<nombre>/ganchos.txt` al lado del video y del caption.txt con:
+Escribe `Terminados/<nombre>/ganchos.txt` al lado del video y del caption.txt con:
   - titulo_portada     → el texto de la Portada (frame 0, la tapa del feed)
   - gancho_titulo      → el cartel de gancho de los primeros segundos (hookText)
   - gancho_hablado_3s  → lo que se dice en los primeros 3 s (subtítulos con inicio < 3000 ms)
@@ -12,9 +12,9 @@ Escribe `Finales/<nombre>/ganchos.txt` al lado del video y del caption.txt con:
 Formato `clave: valor`, una por línea: lo lee una persona y lo lee el tablero.
 
 Uso:
-  python3 scripts/ganchos_txt.py <nombre>                 # lee Root.tsx/Reel.tsx (src/ o _archivo/<nombre>/src/)
+  python3 scripts/ganchos_txt.py <nombre>                 # lee Root.tsx (src/ o Ediciones/<nombre>/src/)
   python3 scripts/ganchos_txt.py <nombre> --gancho "…" --portada "…" --captions <json>   # forzar valores
-  python3 scripts/ganchos_txt.py --todos                  # todos los Finales que no tengan ganchos.txt
+  python3 scripts/ganchos_txt.py --todos                  # todos los Terminados que no tengan ganchos.txt
 Solo stdlib.
 """
 import argparse
@@ -25,7 +25,7 @@ from datetime import date
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-FINALES = REPO / "Finales"
+FINALES = REPO / "Terminados"
 VENTANA_MS = 3000
 
 
@@ -38,9 +38,10 @@ def carpeta_final(nombre):
 
 def fuentes(nombre):
     """Root.tsx + Reel.tsx del proyecto: el código vivo si apunta a este proyecto, si no el archivado."""
-    for d in (REPO / "src", REPO / "_archivo" / nombre / "src"):
+    for d in (REPO / "src", REPO / "Ediciones" / nombre / "src"):
         root, reel = d / "Root.tsx", d / "Reel.tsx"
-        if root.exists() and f"proyectos/{nombre}/" in root.read_text(encoding="utf-8"):
+        txt = root.read_text(encoding="utf-8") if root.exists() else ""
+        if f'const PROYECTO = "{nombre}"' in txt or f"proyectos/{nombre}/" in txt:
             return root.read_text(encoding="utf-8"), reel.read_text(encoding="utf-8") if reel.exists() else ""
     return "", ""
 
@@ -61,7 +62,15 @@ def attr_jsx(tag, attr):
     return m.group(2).strip() if m else ""
 
 
-def portada(reel):
+def const(root, nombre):
+    m = re.search(rf'^const {nombre} = "([^"]*)"', root, re.M)
+    return m.group(1) if m else ""
+
+
+def portada(reel, props=""):
+    nueva = [valor_str(props, "portadaTitulo"), valor_str(props, "portadaLinea2")]
+    if any(nueva):
+        return " ".join(p for p in nueva if p).replace("\\n", " ")
     m = re.search(r"<Portada\b[^>]*?/>", reel, re.S)
     if not m:
         return ""
@@ -102,15 +111,15 @@ def uno(nombre, a):
     root, reel = fuentes(nombre)
     props = bloque_reel(root)
     gancho = a.gancho if a.gancho is not None else valor_str(props, "hookText")
-    tapa = a.portada if a.portada is not None else portada(reel)
-    marca = a.marca or valor_str(props, "brand") or ""
+    tapa = a.portada if a.portada is not None else portada(reel, props)
+    marca = a.marca or valor_str(props, "brand") or const(root, "MARCA")
     cap = a.captions
     if not cap:
-        rel = valor_str(props, "captionsSrc")
-        for base in (REPO / "public", REPO / "_archivo" / nombre / "public"):
-            if rel and (base / rel).exists():
-                cap = base / rel
-                break
+        rel = valor_str(props, "captionsSrc").replace("${PROYECTO}", const(root, "PROYECTO"))
+        viejo = re.match(r"proyectos/([^/]+)/Ediciones/(.+)", rel)  # proyectos de antes de 2026-11-26
+        candidatos = [REPO / "Ediciones" / viejo.group(1) / viejo.group(2)] if viejo else []
+        candidatos.append(REPO / "public" / rel)
+        cap = next((c for c in candidatos if rel and c.exists()), None)
     tres, frase = ("", "")
     if cap and Path(cap).exists():
         tres, frase = hablado(palabras(cap))
@@ -141,8 +150,8 @@ def main():
     p.add_argument("--portada")
     p.add_argument("--captions")
     p.add_argument("--marca")
-    p.add_argument("--out", help="carpeta destino (default Finales/<nombre>/)")
-    p.add_argument("--todos", action="store_true", help="todos los Finales sin ganchos.txt")
+    p.add_argument("--out", help="carpeta destino (default Terminados/<nombre>/)")
+    p.add_argument("--todos", action="store_true", help="todos los Terminados sin ganchos.txt")
     a = p.parse_args()
     if a.todos:
         hechos = 0

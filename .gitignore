@@ -4,39 +4,33 @@ dist
 out
 .DS_Store
 .env
+__pycache__/
 
 # Motor de transcripción — se auto-instala en la 1ª corrida de scripts/transcribe.mjs
 # (via @remotion/install-whisper-cpp). No hace falta compartirlo (~3 GB).
 whisper.cpp
+tmp.json
 
-# Material de trabajo / entregables / archivo — no afectan el render de la plantilla
-_archivo
-_render_hold
-Finales
-
-# Binarios pesados por-video (el diseño NO depende de ellos; se generan por proyecto).
-# Los .json de captions y los .txt de caption SÍ se versionan (formato de ejemplo).
-public/proyectos/**/*.mp4
-public/proyectos/**/*.wav
-public/proyectos/**/*.mov
-public/proyectos/**/*.png
-public/proyectos/**/*.jpg
-public/proyectos/**/*.mp3
-
-# Scratch temporales de scripts (copias de trabajo por-video)
-scripts/_*_tmp.py
-
-# Inbox de crudos (dropzone): dejar acá las grabaciones nuevas antes de arrancar
-# un proyecto. Los videos NO se versionan; solo el README que explica la carpeta.
+# Material de cada usuario: videos, ediciones y entregables. Solo se comparten los README.
 Crudos/*
 !Crudos/README.md
+Ediciones/*
+!Ediciones/README.md
+Terminados/*
+!Terminados/README.md
 
-# Docs legacy/stale — contradicen las reglas vivas (base.md + yapping.md son la
-# fuente de verdad). Se mantienen locales pero NO se comparten para evitar
-# instrucciones contradictorias en quien clona.
-reel-core.md
-REEL-MANUAL.md
-CLAUDE-REF.md
+# Marcas: cada usuario guarda las suyas (marca.json, logo, fuentes, portada, cliente ideal).
+# Se comparten solo la guía y la marca de ejemplo.
+marcas/*
+!marcas/README.md
+!marcas/ejemplo/
 
-# Se mantienen sí o sí (definen el look, son livianos):
-#   public/sfx/*.mp3 · package-lock.json · src/ · .claude/ · scripts/ · docs
+# El Root.tsx de cada video: se crea desde templates/Root.template.tsx (scripts/new_project.sh)
+src/Root.tsx
+
+# Local, fuera de la plantilla
+_experimentos/
+scripts/_*_tmp.py
+
+# Acceso directo public/ediciones → Ediciones/ (lo crea scripts/preparar.sh en cada PC)
+public/ediciones

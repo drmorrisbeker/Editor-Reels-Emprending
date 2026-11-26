@@ -1,7 +1,7 @@
 {
-  "name": "vertical-reel",
+  "name": "editor-reels",
   "version": "1.0.0",
-  "description": "My Remotion video",
+  "description": "Plantilla para editar reels verticales con Claude Code + Remotion",
   "repository": {},
   "license": "UNLICENSED",
   "private": true,
@@ -27,9 +27,12 @@
     "typescript": "5.9.3"
   },
   "scripts": {
+    "preparar": "bash scripts/preparar.sh",
+    "postinstall": "bash scripts/preparar.sh",
+    "predev": "bash scripts/preparar.sh",
     "dev": "remotion studio",
     "build": "remotion bundle",
-    "render": "remotion render Plantilla-DrBeker-Reels out/reel.mp4 --codec h264",
+    "render": "bash scripts/render_reel.sh",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc"
   },

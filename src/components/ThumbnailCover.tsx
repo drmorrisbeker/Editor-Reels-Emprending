@@ -38,7 +38,7 @@ export const ThumbnailCover: React.FC<{
         }}
       />
 
-      {/* Texto — dentro del safe zone (top ≥245), arriba de la cabeza del Dr.
+      {/* Texto — dentro del safe zone (top ≥245), arriba de la cabeza de la persona.
           (o sobre la línea divisoria del split cuando anchorTop lo indica). */}
       <div
         style={{
@@ -51,7 +51,7 @@ export const ThumbnailCover: React.FC<{
           textAlign: "center",
         }}
       >
-        {/* Un solo panel de marca de ancho completo (Morris, 21/11: el cartel por renglón
+        {/* Un solo panel de marca de ancho completo (21/11: el cartel por renglón
             quedaba "muy estrecho"; ocupar más espacio horizontal). textWrap balance reparte
             los renglones parejos. */}
         <div

@@ -1,6 +1,3 @@
-@import "tailwindcss";
-/* Fuentes de marca.
-   · Beker: subtítulos/hook Inter · portada Montserrat 900.
-   · Club de Terapia: subtítulos/hook Inter · portada Geist Black · logo Instrument Serif.
-   Poppins queda cargada por compatibilidad con proyectos viejos. */
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Inter:wght@600;700;800;900&family=Poppins:wght@600;700;800;900&family=Geist:wght@600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap");
+/* Tipografía base de la plantilla (subtítulos, cartel de gancho y portada por defecto).
+   Las fuentes de cada marca se cargan solas desde marcas/<id>/marca.json (src/fonts.ts). */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");

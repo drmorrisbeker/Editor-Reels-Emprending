@@ -1,77 +1,19 @@
 import { z } from "zod";
 
-// ── Overlay types ─────────────────────────────────────────────────────────────
-
-export const ConceptOverlaySchema = z.object({
-  type: z.literal("concept"),
-  startMs: z.number(),
-  endMs: z.number(),
-  lines: z.array(z.string()),
-});
-
-export const EmphasisOverlaySchema = z.object({
-  type: z.literal("emphasis"),
-  startMs: z.number(),
-  endMs: z.number(),
-  keyword: z.string(),
-  subtext: z.string().optional().default(""),
-});
-
-export const ListOverlaySchema = z.object({
-  type: z.literal("list"),
-  startMs: z.number(),
-  endMs: z.number(),
-  items: z.array(z.string()),
-});
-
-export const OverlaySchema = z.discriminatedUnion("type", [
-  ConceptOverlaySchema,
-  EmphasisOverlaySchema,
-  ListOverlaySchema,
-]);
-
-// ── Title card types ──────────────────────────────────────────────────────────
-
-export const TitleCardNumberedSchema = z.object({
-  type: z.literal("numbered"),
-  number: z.string(),
-  line1: z.string(),
-  line2: z.string().optional().default(""),
-  line3: z.string().optional().default(""),
-});
-
-export const TitleCardStatementSchema = z.object({
-  type: z.literal("statement"),
-  lines: z.array(
-    z.object({
-      text: z.string(),
-      yellow: z.boolean().default(false),
-    }),
-  ),
-});
-
-export const TitleCardSchema = z.discriminatedUnion("type", [
-  TitleCardNumberedSchema,
-  TitleCardStatementSchema,
-]);
-
-// ── Root props schema ─────────────────────────────────────────────────────────
-
+// Props del reel yapping (una persona hablando a cámara). TODO lo que cambia por video vive acá
+// (en Root.tsx): Reel.tsx no se edita. Cámara quieta, cortes secos: sin escenas ni zoom.
 export const ReelPropsSchema = z.object({
-  videoSrc: z.string(),
-  captionsSrc: z.string(),
-  bgMusicSrc: z.string().default(""),
-  // Marca / plantilla: define tipografía de portada, color de acento, portada y
-  // cartel de gancho. La skill la pregunta al arranque. Ver src/brand.ts.
-  brand: z.enum(["beker", "clubdeterapia", "foropsiquiatria"]).default("beker"),
-  hookText: z.string(),
-  titleCard: TitleCardSchema,
-  titleCardDurationMs: z.number(),
-  overlays: z.array(OverlaySchema),
+  brand: z.string().default("default"), // <id> = carpeta en marcas/ (si no existe, marca por defecto)
+  videoSrc: z.string(), // ediciones/<proyecto>/clip_edit.mp4
+  captionsSrc: z.string(), // ediciones/<proyecto>/clip_edit_captions.json
+  bgMusicSrc: z.string().default(""), // opcional, muy sutil (vol 0.02)
+  portadaTitulo: z.string().default(""), // portada (frames 0-1, tapa del feed). "\n" = salto de línea
+  portadaLinea2: z.string().default(""), // segunda línea, en el color destacado de la marca
+  portadaBgMs: z.number().optional(), // frame del video que se usa de fondo de la portada
+  hookText: z.string(), // cartel de gancho de los primeros segundos ("" = sin cartel)
+  titleCardDurationMs: z.number().default(5000),
+  clicksMs: z.array(z.number()).default([]), // clicks sutiles en 3-4 frases clave (ms del clip)
   durationSeconds: z.number(),
-  portadaBgMs: z.number().optional(),
 });
 
 export type ReelProps = z.infer<typeof ReelPropsSchema>;
-export type Overlay = z.infer<typeof OverlaySchema>;
-export type TitleCard = z.infer<typeof TitleCardSchema>;

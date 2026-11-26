@@ -1,76 +1,45 @@
-# Reaction — Reel de reacción con pantalla dividida
+# Reacción — pantalla dividida + opinión
 
-Composición: `Plantilla-DrBeker-Reaccion` | 1080×1920 @ 30fps | h264. Reusa Portada /
-ThumbnailCover / Subtitles / brand de reel-yapping (ver `base.md` + `plantillas.md`).
-**Scope acotado:** subtítulos + gancho + portada + split/opinión. SIN zoom, SIN escenas
-didácticas, SIN rehook (menos piezas = más rápido). Estilo/marca: idénticos a yapping.
+Composición `Reaccion` (1080×1920 @ 30fps). Usa la misma marca, portada, cartel de gancho y
+subtítulos que el yapping (`base.md`). Sin zoom, sin escenas.
 
 ## Formato (bloques fijos)
-Tres videos crudos → un reel en dos bloques secuenciales:
-1. **Bloque split** (frames `0 .. splitBlockSeconds`): **arriba 40% YO reaccionando**,
-   **abajo 60% el video al que reacciono** (prioridad al video reaccionado). Audio: el
-   video reaccionado bajo (`sourceVolume`, default 0.5) + mi voz reaccionando (1.4).
-2. **Bloque opinión** (resto): **YO a pantalla completa** dando mi opinión. Audio: mi voz.
+1. **Bloque split** (`0 .. splitBlockSeconds`): **arriba 40% la persona reaccionando**,
+   **abajo 60% el video al que reacciona**. Audio: el video reaccionado bajo
+   (`sourceVolume`, default 0.5) + la voz de quien reacciona.
+2. **Bloque opinión** (resto): la persona a pantalla completa dando su opinión.
 
-**Gancho fijo del split (card de texto tipo "Psiquiatra reacciona:"):** si el reel lleva un
-título/card de apertura sobre el bloque split, ubicarlo **en la línea divisoria entre los dos
-videos** (borde entre el 40% de arriba y el 60% de abajo), NO centrado sobre la mitad de arriba
-— ahí tapa la cara de quien reacciona. Encontrado en revisión real (2026-09-15): el gancho
-puesto en el tercio superior tapaba la imagen del Dr. reaccionando.
+- El **cartel de gancho** va sobre la línea divisoria (40%/60%), no en el tercio de arriba:
+  ahí tapa la cara de quien reacciona. (Ya resuelto en `Reaction.tsx`.)
+- **Sincronía (crítico):** `clip_react` tiene que arrancar en el mismo instante en que arranca
+  el contenido real de `source`. Si el crudo de reacción empieza con la persona
+  acomodándose, ese tramo se recorta; si no, parece que no reacciona a lo que se escucha.
+- Se subtitula solo la voz de quien reacciona (captions de los dos bloques unidos con offset).
+  La portada usa un frame del clip de opinión.
 
-**Sincronización del bloque split (CRÍTICO):** el tramo de `clip_react` que se usa como
-`reactVideoSrc` debe arrancar **en el mismo instante en que arranca el contenido real de
-`source`** (el video al que se reacciona), no antes. Si el crudo de reacción incluye a la
-persona acomodándose/preparándose antes de empezar a mirar y reaccionar, ese tramo previo hay
-que recortarlo — si no, el bloque split arranca con el Dr. todavía posicionándose mientras el
-audio del video reaccionado ya está sonando, y da la sensación de que no está reaccionando a lo
-que se escucha. Encontrado en revisión real (2026-09-15).
+## Los 3 crudos (en `Crudos/<proyecto>/`)
+- el video al que se reacciona → `Ediciones/<p>/source.mp4` (recortado al tramo que se usa)
+- la persona reaccionando → `Ediciones/<p>/clip_react.mp4`
+- la persona opinando → `Ediciones/<p>/clip_opinion.mp4`
 
-Se subtitula **mi voz** en los dos bloques (captions unidos con offset). La portada usa un
-frame del clip de opinión (cara full-screen).
-
-## Los 3 crudos (en `public/proyectos/<nombre>/Crudos/`)
-- **video reaccionado** → `source` (va abajo en el split). Recortar al tramo que se usa.
-- **yo reaccionando** → `clip_react` (arriba en el split).
-- **yo opinión** → `clip_opinion` (bloque full-screen).
-
-## Flujo (replica reel-yapping, adaptado)
-1. **Paso 0 — marca** (preguntar; ver `plantillas.md`) → prop `brand`.
-2. `bash scripts/new_project.sh <nombre>` (crea carpetas, resetea Root/Reel a plantilla en
-   blanco con AMBAS composiciones). Mover los 3 crudos a `Crudos/`.
-3. **source**: recortar el video reaccionado al tramo deseado → `Ediciones/source.mp4`
-   (`scripts/cut_clip`/ffmpeg si hace falta). Debe durar ≥ `splitBlockSeconds`.
-4. **clip_react**: cortar silencios del video "yo reaccionando" con `scripts/remove_silences.py`
-   → `Ediciones/clip_react.mp4`. Su duración final = **`splitBlockSeconds`**.
-5. **clip_opinion**: cortar silencios del video "yo opinión" (igual que yapping, cierre con
-   la última palabra completa + ~400ms) → `Ediciones/clip_opinion.mp4`.
-6. **Transcribir** por separado (mi voz): `node scripts/transcribe.mjs Ediciones/clip_react.mp4`
-   y `node scripts/transcribe.mjs Ediciones/clip_opinion.mp4` → dos `*_captions.json`.
-7. **Unir captions** con offset del bloque split:
+## Flujo
+1. Arranque (`arranque.md`) y `bash scripts/new_project.sh <p> <marca>`. Mover los 3 crudos a
+   `Crudos/<p>/`.
+2. **source:** recortar el video reaccionado al tramo deseado (ffmpeg) → `source.mp4`. Tiene que
+   durar ≥ `splitBlockSeconds`.
+3. **clip_react** y **clip_opinion:** cortar silencios de cada uno con `scripts/desilence.py`
+   (como el paso 3 de `base.md`). La duración de `clip_react` es `splitBlockSeconds`.
+4. **Transcribir** cada clip por separado (de a uno): `node scripts/transcribe.mjs
+   Ediciones/<p>/clip_react.mp4` y lo mismo con `clip_opinion.mp4`.
+5. **Unir captions** con el offset del bloque split:
    ```bash
-   node scripts/reaction_captions_merge.mjs \
-     Ediciones/clip_react_captions.json Ediciones/clip_opinion_captions.json <splitBlockMs> \
-     > Ediciones/clip_reaccion_captions.json
+   node scripts/reaction_captions_merge.mjs Ediciones/<p>/clip_react_captions.json \
+     Ediciones/<p>/clip_opinion_captions.json <splitBlockMs> > Ediciones/<p>/clip_reaccion_captions.json
    ```
-   `splitBlockMs` = duración de `clip_react.mp4` en ms. Revisar el JSON unido contra el audio
-   (misma revisión de captions que base.md: alucinaciones, zero-duration, capitalizar inicios
-   de idea). Detección de repeticiones opcional: `node scripts/detect_repeats.mjs <json>`.
-8. **Pausa (títulos)**: proponer **título de portada** + **gancho** (2–3 opciones c/u,
-   marca-aware) y esperar OK. No hay escenas ni zoom en reacción.
-9. **Root.tsx** → completar `reactionDefaultProps`: `brand`, `reactVideoSrc`, `sourceVideoSrc`,
-   `sourceVolume`, `splitBlockSeconds`, `opinionVideoSrc`, `captionsSrc`, `hookText`,
-   `portadaBgMs` (`node scripts/portada_bg_pick.mjs Ediciones/clip_opinion_captions.json`),
-   `durationSeconds` = `splitBlockSeconds` + duración de `clip_opinion`.
-10. **Render**:
-    ```bash
-    npx remotion render Plantilla-DrBeker-Reaccion Finales/<nombre>/<nombre>.mp4
-    ```
-11. **Renombrar carpeta** a kebab-case descriptivo (nunca dejar fecha) y actualizar rutas en
-    Root.tsx. Confirmar la ruta final.
-12. **Caption para redes** (base.md; preguntar CTA engagement vs lead magnet primero) →
-    `public/proyectos/<nombre>/caption.txt`.
-
-## Sync del split (nota)
-El split muestra `clip_react` (yo) y `source` (reaccionado) en paralelo desde t=0; `source` se
-corta al llegar a `splitBlockSeconds`. No requiere sync frame-a-frame (es vibe reacción). Si
-querés que el video reaccionado empiece en un punto puntual, recortá `source.mp4` a ese tramo.
+   `splitBlockMs` = duración de `clip_react.mp4` en ms. Revisar el JSON unido (paso 5 de `base.md`).
+6. **✋ Pausa de títulos** (portada + gancho). Esperar OK.
+7. **Root.tsx** → `reactionDefaultProps`: `splitBlockSeconds`, `portadaTitulo`/`portadaLinea2`,
+   `hookText`, `portadaBgMs` (frame del clip de opinión, cara presentable), `durationSeconds`
+   = `splitBlockSeconds` + duración de `clip_opinion`. Las rutas ya vienen puestas.
+8. **Render:** `bash scripts/render_reel.sh <p> Reaccion` → `Terminados/<p>/<p>.mp4`.
+9. **Cierre** igual que `base.md` paso 9 (renombrar si hace falta, `caption.txt`, `ganchos.txt`).

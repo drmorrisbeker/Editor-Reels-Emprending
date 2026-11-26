@@ -1,15 +1,27 @@
-# Reels — Plantilla Dr. Beker
+# Editor de reels — plantilla
 
-Editor de reels verticales (1080×1920) con Remotion. Dos tipos de reel y **tres marcas**
-(Morris Beker / Club de Terapia / Foro Psiquiatría, prop `brand`; ver `.claude/rules/plantillas.md`).
+Plantilla para editar reels verticales (1080×1920) con Claude Code + Remotion. Dos tipos de
+reel, cualquier marca. Cámara quieta y cortes secos: **sin escenas ni zoom.**
 
 **Cómo empezar:**
-- Si no está claro el tipo, usar el agente **`reel-editor`**: pregunta la marca, detecta el
-  tipo (yapping vs reacción) y despacha a la skill correcta.
-- Directo: **`/reel-yapping`** (un locutor a cámara, full-screen con zoom/escenas) o
-  **`/reel-reaction`** (pantalla dividida: video reaccionado + yo reaccionando + mi opinión).
+- **`/reel-yapping`** — una persona hablando a cámara.
+- **`/reel-reaction`** — pantalla dividida (el video al que se reacciona + la persona
+  reaccionando) y después su opinión a pantalla completa.
+- Si no está claro cuál, preguntar: un video de una persona a cámara → yapping; tres videos o
+  "reacciono a…" → reacción.
 
-**Reglas (`.claude/rules/`, fuente de verdad):**
-`base.md` (común: subtítulos, portada, gancho, marca, caption) · `yapping.md` (zoom/escenas) ·
-`reaction.md` (split/opinión) · `plantillas.md` (marcas, on-demand) · `scenes.md` (catálogo de
-escenas reutilizables). Config de marcas en código: `src/brand.ts`. Setup: ver `SETUP.md`. **Mapa del repo (dónde está cada cosa): `ESTRUCTURA.md`.**
+La primera vez, la skill arma la marca (`.claude/rules/arranque.md`): branding, cliente ideal
+y portada. Cada pregunta se puede rechazar y se sigue sin eso.
+
+**Reglas (`.claude/rules/`):** `arranque.md` (marca, branding, cliente ideal, portada) ·
+`base.md` (carpetas, cortes, transcripción, subtítulos, portada, gancho, render, caption con
+SEO) · `yapping.md` · `reaction.md`.
+
+**Carpetas:** `Crudos/<proyecto>/` (originales) · `Ediciones/<proyecto>/` (archivos de
+trabajo) · `Terminados/<proyecto>/` (video + `caption.txt` + `ganchos.txt`) · `marcas/<id>/`
+(ver `marcas/README.md`). Si faltan, `bash scripts/preparar.sh` las crea.
+
+**Código:** solo `src/Root.tsx` cambia por video (se crea desde `templates/Root.template.tsx`
+con `scripts/new_project.sh`). Renderizar siempre con `bash scripts/render_reel.sh`, nunca con
+`npx remotion render` a secas (copiaría todas las Ediciones). Hablarle a la persona en
+lenguaje simple: qué cambia para ella, no cómo.
